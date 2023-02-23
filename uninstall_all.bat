@@ -5,3 +5,7 @@ echo Remove C:/lib_visual_cpp/SDL2
 RD /S /Q "C:/lib_visual_cpp/SDL2"
 echo Remove C:/lib_cpp/SDL2
 RD /S /Q "C:/lib_cpp/SDL2"
+echo Remove C:/lib_visual_cpp/opencv_4.7.0
+RD /S /Q "C:/lib_visual_cpp/opencv_4.7.0"
+echo Remove C:/lib_cpp/opencv_4.7.0
+RD /S /Q "C:/lib_cpp/opencv_4.7.0"
