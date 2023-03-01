@@ -56,4 +56,6 @@ RD /S /Q "%disk%:/lib_visual_cpp/opencv_4.7.0"
 echo Remove %disk%:/lib_cpp/opencv_4.7.0
 RD /S /Q "%disk%:/lib_cpp/opencv_4.7.0"
 
+pause
+
 :No
