@@ -1,6 +1,6 @@
 @echo off
 
-set install_path=:\lib_cpp
+set install_path=:\lib_visual_cpp
 
 :: ______________Choosing disk______________ ::
 
@@ -41,10 +41,10 @@ if not x%disks_without_selection%==x%disks% (
 set install_path=%disk%%install_path%
 
 :: ______________Install SDL______________ ::
-cd ./libraries/SDL
+cd ../libraries/SDL
 
-:: Build SDL for MinGW
-cmake -B ./build -G "MinGW Makefiles" 
+:: Build SDL for VS 2022 Win32
+cmake -B ./build -G "Visual Studio 17 2022" -A Win32 
 cmake --build ./build --config Release
 
 :: Install SDL at "C:\lib_visual_cpp\SDL2"
@@ -58,11 +58,11 @@ cd ../..
 :: ______________Install OpenCV______________ ::
 cd ./libraries/opencv
 
-:: Build OpenCV for MinGW
-cmake -B ./build -G "MinGW Makefiles"  
+:: Build OpenCV for VS 2022 Win32
+cmake -B ./build -G "Visual Studio 17 2022" -A Win32  
 cmake --build ./build --config Release
 
-:: Install OpenCV at "C:\lib_cpp\opencv_4.7.0"
+:: Install OpenCV at "C:\lib_visual_cpp\opencv_4.7.0"
 RD /S /Q "%install_path%\opencv_4.7.0"
 cmake --install ./build --prefix "%install_path%\opencv_4.7.0"
 
@@ -71,9 +71,7 @@ RD /S /Q "./build"
 cd ../..
 
 :: ______________Build Project______________ ::
-cmake -B ./build -G "MinGW Makefiles"
-cd ./build
-make 
-cd ..
+cd ./Client
+cmake -B ./build -G "Visual Studio 17 2022" -A Win32
 
 pause

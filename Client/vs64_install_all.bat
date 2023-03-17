@@ -41,7 +41,7 @@ if not x%disks_without_selection%==x%disks% (
 set install_path=%disk%%install_path%
 
 :: ______________Install SDL______________ ::
-cd ./libraries/SDL
+cd ../libraries/SDL
 
 :: Build SDL for VS 2022 x64
 cmake -B ./build -G "Visual Studio 17 2022" -A x64  
@@ -71,6 +71,7 @@ RD /S /Q "./build"
 cd ../..
 
 :: ______________Build Project______________ ::
+cd ./Client
 cmake -B ./build -G "Visual Studio 17 2022" -A x64
 
 pause
