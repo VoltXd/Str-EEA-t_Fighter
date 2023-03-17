@@ -70,6 +70,66 @@ cmake --install ./build --prefix "%install_path%\opencv_4.7.0"
 RD /S /Q "./build"
 cd ../..
 
+:: ______________Install LibRealSense______________ ::
+cd ./libraries/librealsense
+
+:: Build LibRealSense for MinGW
+cmake -B ./build -G "MinGW Makefiles"  
+cmake --build ./build --config Release
+
+:: Install LibRealSense at "C:\lib_visual_cpp\realsense2_v2.53.1"
+RD /S /Q "%install_path%\realsense2_v2.53.1"
+cmake --install ./build --prefix "%install_path%\realsense2_v2.53.1"
+
+:: Remove LibRealSense build
+RD /S /Q "./build"
+cd ../..
+
+:: ______________Install SDL_image______________ ::
+cd ./libraries/SDL_image
+
+:: Build SDL_image for MinGW
+cmake -B ./build -G "MinGW Makefiles"  
+cmake --build ./build --config Release
+
+:: Install SDL_image at "C:\lib_visual_cpp\SDL2_image"
+RD /S /Q "%install_path%\SDL2_image"
+cmake --install ./build --prefix "%install_path%\SDL2_image"
+
+:: Remove SDL_image build
+RD /S /Q "./build"
+cd ../..
+
+:: ______________Install SDL_mixer______________ ::
+cd ./libraries/SDL_mixer
+
+:: Build SDL_mixer for MinGW
+cmake -B ./build -G "MinGW Makefiles"  
+cmake --build ./build --config Release
+
+:: Install SDL_mixer at "C:\lib_visual_cpp\SDL2_mixer"
+RD /S /Q "%install_path%\SDL2_mixer"
+cmake --install ./build --prefix "%install_path%\SDL2_mixer"
+
+:: Remove SDL_mixer build
+RD /S /Q "./build"
+cd ../..
+
+:: ______________Install SDL_ttf______________ ::
+cd ./libraries/SDL_ttf
+
+:: Build SDL_ttf for MinGW
+cmake -B ./build -G "MinGW Makefiles"  
+cmake --build ./build --config Release
+
+:: Install SDL_ttf at "C:\lib_visual_cpp\SDL2_ttf"
+RD /S /Q "%install_path%\SDL2_ttf"
+cmake --install ./build --prefix "%install_path%\SDL2_ttf"
+
+:: Remove SDL_ttf build
+RD /S /Q "./build"
+cd ../..
+
 :: ______________Build Project______________ ::
 cd ./Client
 cmake -B ./build -G "MinGW Makefiles"

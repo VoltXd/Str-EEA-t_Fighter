@@ -16,6 +16,18 @@ find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available 
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 
+# Look for SDL2_Image Packages
+find_package(SDL2_image REQUIRED CONFIG)
+
+# Look for SDL2_Mixer Packages
+find_package(SDL2_mixer REQUIRED)
+
+# Look for SDL2_TTF Packages
+find_package(SDL2_ttf REQUIRED)
+
+# Look for Lib realsense Packages
+find_package(realsense2 REQUIRED CONFIG)
+
 # Make the executable with the headers & sources
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
@@ -31,8 +43,17 @@ endif()
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 
-# Include libraries of OpenCV
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+# Link to the SDL2_ttf library
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_ttf::SDL2_ttf)
+
+# Link to the SDL2_image library
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_image::SDL2_image)
+
+# Link to the SDL2_mixer library
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_mixer::SDL2_mixer)
+
+# Link to the realsense2 library
+target_link_libraries(${PROJECT_NAME} PRIVATE ${realsense2_LIBRARY})
 
 # Link OpenCV libraries
 target_link_libraries( ${PROJECT_NAME} PRIVATE ${OpenCV_LIBS} )
