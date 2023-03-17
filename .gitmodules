@@ -1,8 +1,23 @@
 [submodule "libraries/SDL"]
 	path = libraries/SDL
 	url = https://github.com/libsdl-org/SDL.git
-	branch = release-2.26.x
 
 [submodule "libraries/opencv"]
 	path = libraries/opencv
 	url = https://github.com/opencv/opencv.git
+	
+[submodule "libraries/librealsense"]
+	path = libraries/librealsense
+	url = https://github.com/IntelRealSense/librealsense.git
+
+[submodule "libraries/SDL_image"]
+	path = libraries/SDL_image
+	url = https://github.com/libsdl-org/SDL_image.git
+
+[submodule "libraries/SDL_mixer"]
+	path = libraries/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer.git
+
+[submodule "libraries/SDL_ttf"]
+	path = libraries/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
