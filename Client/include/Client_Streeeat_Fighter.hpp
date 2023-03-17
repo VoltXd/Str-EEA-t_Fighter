@@ -9,9 +9,9 @@
 #include <thread>
 #include <mutex>
 
-#include "Data_structs.h"
-#include "Player.h"
-#include "Timer.h"
+#include "Data_structs.hpp"
+#include "Player.hpp"
+#include "Timer.hpp"
 
 #define TIMEOUT_VALUE 3000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
 

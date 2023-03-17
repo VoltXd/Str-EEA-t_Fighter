@@ -3,7 +3,7 @@
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include "Client_Streeeat_Fighter.h"
+#include "Client_Streeeat_Fighter.hpp"
 
 int main()	{
     WSADATA wsaData;

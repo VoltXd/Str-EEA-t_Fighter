@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Player.hpp"
 
 Player::Player(string playerName) {
 	name = playerName;

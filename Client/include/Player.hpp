@@ -10,8 +10,8 @@ using namespace std;
 
 #include <WinSock2.h> 
 
-#include "Data_structs.h"
-#include "Timer.h"
+#include "Data_structs.hpp"
+#include "Timer.hpp"
 
 class Player {
 private:
