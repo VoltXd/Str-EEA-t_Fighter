@@ -13,10 +13,15 @@ using namespace std;
 #include "Data_structs.hpp"
 #include "Timer.hpp"
 
+#define LOWER_BOUND(value, limit) (value < limit) ? value = limit : value = value 
+#define UPPER_BOUND(value, limit) (value > limit) ? value = limit : value = value
+
 class Player {
 private:
 	string name;
 	ServerToClient_Data_TypeDef lastReceivedData; // dernières données correctes reçues
+	ServerToClient_Data_TypeDef prevReceivedData; // avant-dernières données correctes reçues
+	double delayBtw2LastData; // délai entre les deux dernières données reçues 
 	Timer comLossesTimer; // timer pour la gestion de la perte de communication
 
 	float leftHandPos, rightHandPos;
@@ -34,6 +39,9 @@ public:
 
 	// set/get methods
 	void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
+	void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
+	void setDelayBtw2LastData(double delayBtw2LastData) { this->delayBtw2LastData = delayBtw2LastData; };
+	ServerToClient_Data_TypeDef getLastReceivedData() { return lastReceivedData; };
 	string getName() { return name; };
 	float getLeftHandPos() { return leftHandPos; };
 	float getRightHandPos() { return rightHandPos; };
@@ -45,7 +53,8 @@ public:
 	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
 	double checkTime() { return comLossesTimer.getTime(); };
 
-	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu
+	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
+	void updatePosAutoShifting(float minLeftPos, float maxRightPos); 
 
 	void displayPos();
 };

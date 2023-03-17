@@ -15,6 +15,9 @@ private:
 
 public:
 	Timer() {};
+
+	bool isStarted() { return started; };
+
 	void start() {
 		startNbrTicks = clock();
 		stopped = false;

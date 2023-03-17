@@ -95,13 +95,23 @@ int main()	{
                 isStarted = false;
             }
 
-            // si le jeu continue
-            if (isStarted) {
+            if (player->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
                 // stockage des dernières données correctes reçues
                 player->pullLastReceivedData();
-                opponent->pullLastReceivedData();
-                cout << "leftHandPosOpp(recv) : " << opponent->getLeftHandPos() << endl;
             }
+            else {
+                // déplacement automatique tant qu'aucune autre donnée est reçue
+                player->updatePosAutoShifting(0, 100);
+            }
+            if (opponent->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
+                // stockage des dernières données correctes reçues
+                opponent->pullLastReceivedData();
+            }
+            else {
+                // déplacement automatique tant qu'aucune autre donnée est reçue
+                opponent->updatePosAutoShifting(0, 100);
+            }
+            cout << "leftHandPosOpp(recv) : " << opponent->getLeftHandPos() << endl;
 
             recvDataSyncMutex.unlock();
             /* --- */
@@ -169,11 +179,15 @@ void recvPlayerData() {
         if (nbrBytesReceived == sizeof(receiptBuffer)) {
             switch (receiptBuffer.heading) {
             case LOCAL_PLAYER_HEADING:
+                player->setPrevReceivedData(player->getLastReceivedData());
                 player->setLastReceivedData(receiptBuffer);
+                player->setDelayBtw2LastData(player->checkTime());
                 player->dataAreReceived();
                 break;
             case OPPOSING_PLAYER_HEADING:
+                opponent->setPrevReceivedData(opponent->getLastReceivedData());
                 opponent->setLastReceivedData(receiptBuffer);
+                opponent->setDelayBtw2LastData(opponent->checkTime());
                 opponent->dataAreReceived();
                 break;
             default: break;
