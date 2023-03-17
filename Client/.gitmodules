@@ -1,0 +1,8 @@
+[submodule "libraries/SDL"]
+	path = Client/libraries/SDL
+	url = https://github.com/libsdl-org/SDL.git
+	branch = release-2.26.x
+
+[submodule "libraries/opencv"]
+	path = Client/libraries/opencv
+	url = https://github.com/opencv/opencv.git
