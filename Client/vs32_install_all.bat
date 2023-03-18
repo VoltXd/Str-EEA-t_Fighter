@@ -88,6 +88,10 @@ cd ../..
 :: ______________Install SDL_image______________ ::
 cd ./libraries/SDL_image
 
+:: Clone submodules
+git submodule init
+git submodule update
+
 :: Build SDL_image for VS 2022 Win32
 cmake -B ./build -G "Visual Studio 17 2022" -A Win32  
 cmake --build ./build --config Release
@@ -103,6 +107,10 @@ cd ../..
 :: ______________Install SDL_mixer______________ ::
 cd ./libraries/SDL_mixer
 
+:: Clone submodules
+git submodule init
+git submodule update
+
 :: Build SDL_mixer for VS 2022 Win32
 cmake -B ./build -G "Visual Studio 17 2022" -A Win32  
 cmake --build ./build --config Release
@@ -117,6 +125,10 @@ cd ../..
 
 :: ______________Install SDL_ttf______________ ::
 cd ./libraries/SDL_ttf
+
+:: Clone submodules
+git submodule init
+git submodule update
 
 :: Build SDL_ttf for VS 2022 Win32
 cmake -B ./build -G "Visual Studio 17 2022" -A Win32  

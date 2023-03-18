@@ -44,7 +44,7 @@ set install_path=%disk%%install_path%
 cd ../libraries/SDL
 
 :: Build SDL for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install SDL at "C:\lib_visual_cpp\SDL2"
@@ -59,7 +59,7 @@ cd ../..
 cd ./libraries/opencv
 
 :: Build OpenCV for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install OpenCV at "C:\lib_visual_cpp\opencv_4.7.0"
@@ -74,7 +74,7 @@ cd ../..
 cd ./libraries/librealsense
 
 :: Build LibRealSense for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install LibRealSense at "C:\lib_visual_cpp\realsense2_v2.53.1"
@@ -93,7 +93,7 @@ git submodule init
 git submodule update
 
 :: Build SDL_image for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install SDL_image at "C:\lib_visual_cpp\SDL2_image"
@@ -112,7 +112,7 @@ git submodule init
 git submodule update
 
 :: Build SDL_mixer for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install SDL_mixer at "C:\lib_visual_cpp\SDL2_mixer"
@@ -131,7 +131,7 @@ git submodule init
 git submodule update
 
 :: Build SDL_ttf for VS 2022 x64
-cmake -B ./build -G "Visual Studio 17 2022" -A x64  
+cmake -B ./build -G "Visual Studio 16 2019" -A x64  
 cmake --build ./build --config Release
 
 :: Install SDL_ttf at "C:\lib_visual_cpp\SDL2_ttf"
@@ -144,6 +144,6 @@ cd ../..
 
 :: ______________Build Project______________ ::
 cd ./Client
-cmake -B ./build -G "Visual Studio 17 2022" -A x64
+cmake -B ./build -G "Visual Studio 16 2019" -A x64
 
 pause
