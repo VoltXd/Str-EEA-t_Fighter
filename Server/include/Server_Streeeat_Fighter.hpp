@@ -13,10 +13,10 @@
 
 #include <ctime>
 
-#include "Data_structs.h"
-#include "Player.h"
-#include "Gameplay.h"
-#include "Timer.h"
+#include "Data_structs.hpp"
+#include "Player.hpp"
+#include "Gameplay.hpp"
+#include "Timer.hpp"
 
 #define TIMEOUT_VALUE 3000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
 

@@ -28,6 +28,7 @@ private:
 	float headPos;
 	float punchDepth;
 	char handState;
+	char paused;
 
 	float lifeBar;
 	float guardBar;

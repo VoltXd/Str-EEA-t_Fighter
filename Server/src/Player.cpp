@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Player.hpp"
 
 Player::Player() {
 	name = "undefined";
@@ -11,6 +11,7 @@ Player::Player() {
 	headPos = INITIAL_HEADPOS;
 	punchDepth = INITIAL_PUNCHDEPTH;
 	handState = INITIAL_HANDSTATE;
+	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
 	guardBar = INITIAL_GUARDBAR;
 	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
@@ -28,6 +29,7 @@ void Player::pullLastReceivedData() {
 	headPos = lastReceivedData.headPos;
 	punchDepth = lastReceivedData.punchDepth;
 	handState = lastReceivedData.handState;
+	paused = lastReceivedData.paused;
 }
 
 void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
@@ -39,17 +41,16 @@ void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
 	playerData.headPos = getHeadPos();
 	playerData.punchDepth = getPunchDepth();
 	playerData.handState = getHandState();
+	playerData.paused = getPaused();
 	playerData.lifeBar = getLifeBar();
 	playerData.guardBar = getGuardBar();
 	playerData.afterPunchDelay = getAfterPunchDelay();
 
 	// envoi au joueur lui-même
-	//receiverAddr = addr;
 	playerData.heading = LOCAL_PLAYER_HEADING;
 	sendto(socket, (char*)&playerData, sizeof(playerData), 0, (SOCKADDR*)&addr, sizeof(addr));
 
 	// envoi au joueur adverse
-	//receiverAddr = opponentAddr;
 	playerData.heading = OPPOSING_PLAYER_HEADING;
 	sendto(socket, (char*)&playerData, sizeof(playerData), 0, (SOCKADDR*)&opponentAddr, sizeof(opponentAddr));
 }

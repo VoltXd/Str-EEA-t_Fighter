@@ -36,6 +36,7 @@ typedef struct ClientToServer_Position {
 	float headPos;
 	float punchDepth;
 	char handState; // état des mains (poings ou pas)
+	char paused; // état du joueur (recalibration régulièrement nécessaire)
 } ClientToServer_Position_TypeDef;
 
 // format des données UDP pour le lancement du jeu (serveur vers client)
@@ -52,6 +53,7 @@ typedef struct ServerToClient_Data {
 	float headPos;
 	float punchDepth;
 	char handState; // état des mains (poings ou pas)
+	char paused;
 	float lifeBar;
 	float guardBar;
 	float afterPunchDelay; // délai de réaction du joueur après le coup reçu

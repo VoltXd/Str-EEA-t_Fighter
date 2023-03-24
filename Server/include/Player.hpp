@@ -10,8 +10,8 @@ using namespace std;
 
 #include <WinSock2.h> 
 
-#include "Data_structs.h"
-#include "Timer.h"
+#include "Data_structs.hpp"
+#include "Timer.hpp"
 
 class Player {
 private :
@@ -24,6 +24,7 @@ private :
 	float headPos;
 	float punchDepth;
 	char handState;
+	char paused;
 
 	float lifeBar;
 	float guardBar;
@@ -46,6 +47,7 @@ public :
 	float getRightHandPos() { return rightHandPos; };
 	float getHeadPos() { return headPos; };
 	char getHandState() { return handState; };
+	char getPaused() { return paused; };
 	float getPunchDepth() { return punchDepth; };
 	float getLifeBar() { return lifeBar; };
 	float getGuardBar() { return guardBar; };

@@ -10,6 +10,7 @@ Player::Player(string playerName) {
 	headPos = INITIAL_HEADPOS;
 	punchDepth = INITIAL_PUNCHDEPTH;
 	handState = INITIAL_HANDSTATE;
+	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
 	guardBar = INITIAL_GUARDBAR;
 	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
@@ -21,6 +22,7 @@ void Player::pullLastReceivedData() {
 	headPos = lastReceivedData.headPos;
 	punchDepth = lastReceivedData.punchDepth;
 	handState = lastReceivedData.handState;
+	paused = lastReceivedData.paused;
 	lifeBar = lastReceivedData.lifeBar;
 	guardBar = lastReceivedData.guardBar;
 	afterPunchDelay = lastReceivedData.afterPunchDelay;
