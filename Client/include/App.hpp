@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL.h>
-#include <iostream>
+#include "Button.hpp"
 
 class App
 {
@@ -21,5 +21,6 @@ private:
 	bool m_isRunning;
 	int m_screenWidth;
 	int m_screenHeight;
-
+	Button testButton;
+	SDL_Point m_mousePosition;
 };
