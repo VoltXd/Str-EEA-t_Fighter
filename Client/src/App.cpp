@@ -1,42 +1,58 @@
 #include "App.hpp"
 
-#include <SDL.h>
 #include <iostream>
+#include <SDL.h>
+#include <SDL_ttf.h>
 
 #include "Toolbox.hpp"
+#include "MainMenu.hpp"
+#include "Settings.hpp"
 
 App::App()
 {
 	m_window = nullptr;
 	m_renderer = nullptr;
 	m_isRunning = true;
-	m_screenWidth = 1280;
-	m_screenHeight = 720;
+
+	currentScene = SceneId::MainMenu;
+	
+	settings.screenWidth = 1280;
+	settings.screenHeight = 720;
+	settings.isFullscreenOn = false;
+
 }
 
 int App::run()
 {
 	// App initialisation
-	int initErrorCode = initialise();
-	if (initErrorCode != 0)
-		return initErrorCode;
+	if (initialise() != EXIT_SUCCESS)
+		return EXIT_FAILURE;
 
-	testButton.initialize(m_renderer, "imports/images/button_blue.png", "Test", m_screenWidth / 2, m_screenHeight / 2, m_screenWidth / 6, m_screenHeight / 6);
-
-	while (m_isRunning)
+	while (m_isRunning);
 	{
-		input();
-		update();
-		render();
-	}
+		switch (currentScene)
+		{
+			case SceneId::MainMenu:
+			{
+				MainMenu mainMenu(m_renderer);
+				currentScene = mainMenu.run();
+				break;
+			}
+			
+			default:
+				m_isRunning = false;
+				break;
+		}
+	} 
 
 	// Exit program
 	// Kill SDL componants
+	TTF_Quit();
 	SDL_DestroyRenderer(m_renderer);
 	SDL_DestroyWindow(m_window);
 	SDL_Quit();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int App::initialise()
@@ -52,7 +68,7 @@ int App::initialise()
 	}
 
 	// Create window
-	m_window = SDL_CreateWindow("Str[EEA]t Fighter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_screenWidth, m_screenHeight, SDL_WINDOW_SHOWN);
+	m_window = SDL_CreateWindow("Str[EEA]t Fighter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.screenWidth, settings.screenHeight, SDL_WINDOW_SHOWN);
 	if (m_window == nullptr)
 	{
 		SDL_ShowError("SDL Window creation error", __FILE__, __LINE__);
@@ -75,42 +91,13 @@ int App::initialise()
 		return EXIT_FAILURE;
 	}
 
-	return 0;
-}
-
-void App::input()
-{
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
+	// Enable SDL_TTF
+	errorCode = TTF_Init();
+	if (errorCode != 0)
 	{
-		switch (event.type)
-		{
-			case SDL_QUIT:
-				m_isRunning = false;
-				break;
-			
-			case SDL_MOUSEMOTION:
-				SDL_GetMouseState(&m_mousePosition.x, &m_mousePosition.y);
-				break;
-
-			default:
-				break;
-		}
-
+		SDL_ShowError("SDL TTF_Init error", __FILE__, __LINE__);
+		return EXIT_FAILURE;
 	}
-}
 
-void App::update()
-{
-	testButton.update(m_mousePosition);
-}
-
-void App::render()
-{
-	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 128);
-	SDL_RenderClear(m_renderer);
-
-	testButton.render(m_renderer);
-
-	SDL_RenderPresent(m_renderer);
+	return EXIT_SUCCESS;
 }
