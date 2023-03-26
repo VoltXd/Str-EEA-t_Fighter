@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL.h>
+
 enum class SceneId
 {
     Intro,

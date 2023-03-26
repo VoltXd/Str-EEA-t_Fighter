@@ -2,8 +2,6 @@
 
 #include "Scene.hpp"
 
-#include <SDL.h>
-
 class SinglePlayer : public Scene
 {
     public:

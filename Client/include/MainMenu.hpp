@@ -3,7 +3,6 @@
 #include "Scene.hpp"
 #include "Button.hpp"
 
-#include <SDL.h>
 #include <SDL_ttf.h>
 
 
