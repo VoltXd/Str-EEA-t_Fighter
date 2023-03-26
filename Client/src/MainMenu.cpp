@@ -25,11 +25,6 @@ MainMenu::MainMenu(SDL_Renderer* renderer)
     m_isRunning = true;
 }
 
-MainMenu::~MainMenu()
-{
-
-}
-
 SceneId MainMenu::run() 
 {
     if (initialise() != EXIT_SUCCESS)
@@ -74,9 +69,28 @@ int MainMenu::initialise()
         return EXIT_FAILURE;    
     }
 
-    m_singlePlayerButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "JOUER", settings.screenWidth / 2, settings.screenHeight / 4, 0.6 * settings.screenWidth, settings.screenHeight / 6);
-    m_multiPlayerButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "MULTIJOUEUR", settings.screenWidth / 2, settings.screenHeight / 2, 0.6 * settings.screenWidth, settings.screenHeight / 6);
-    m_quitButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "QUITTER", settings.screenWidth / 2, settings.screenHeight * 3 / 4, 0.6 * settings.screenWidth, settings.screenHeight / 6);
+    // Init buttons
+    int errorCode = m_singlePlayerButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "JOUER", settings.screenWidth / 2, settings.screenHeight / 4, 0.6 * settings.screenWidth, settings.screenHeight / 6);
+    if (errorCode != EXIT_SUCCESS)
+    {
+        SDL_ShowError("MainMenu Init. button SP error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+
+    errorCode = m_multiPlayerButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "MULTIJOUEUR", settings.screenWidth / 2, settings.screenHeight / 2, 0.6 * settings.screenWidth, settings.screenHeight / 6);
+    if (errorCode != EXIT_SUCCESS)
+    {
+        SDL_ShowError("MainMenu Init. button MP error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+    
+    errorCode = m_quitButton.initialise(m_renderer, m_buttonTexture, m_buttonFont, "QUITTER", settings.screenWidth / 2, settings.screenHeight * 3 / 4, 0.6 * settings.screenWidth, settings.screenHeight / 6);
+    if (errorCode != EXIT_SUCCESS)
+    {
+        SDL_ShowError("MainMenu Init. button Quit error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+
 
     return EXIT_SUCCESS;
 }

@@ -23,5 +23,8 @@ class Scene
     virtual void render() = 0;
 
     protected:
+    SDL_Renderer* m_renderer;
+
     bool m_isRunning;
+    SceneId m_nextScene;
 };

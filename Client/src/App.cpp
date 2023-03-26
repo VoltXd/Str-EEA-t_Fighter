@@ -6,6 +6,7 @@
 
 #include "Toolbox.hpp"
 #include "MainMenu.hpp"
+#include "SinglePlayer.hpp"
 #include "Settings.hpp"
 
 App::App()
@@ -28,7 +29,7 @@ int App::run()
 	if (initialise() != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	while (m_isRunning);
+	while (m_isRunning)
 	{
 		switch (currentScene)
 		{
@@ -38,6 +39,17 @@ int App::run()
 				currentScene = mainMenu.run();
 				break;
 			}
+
+			case SceneId::SinglePlayer:
+			{
+				SinglePlayer singlePlayer(m_renderer);
+				currentScene = singlePlayer.run();
+				break;
+			}
+			
+			case SceneId::Quit:
+				m_isRunning = false;
+				break;
 			
 			default:
 				m_isRunning = false;
@@ -58,7 +70,7 @@ int App::run()
 int App::initialise()
 {
 	int errorCode = 0;
-	
+
 	// Init. SDL
 	errorCode = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 	if (errorCode != 0)
