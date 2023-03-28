@@ -26,29 +26,31 @@
 // format des données UDP pour la connection client-serveur
 typedef struct ClientToServer_Connection {
 	char heading = CONNECTION_HEADING;
-	char playerName[MAX_NBR_LETTERS_IN_PLAYERNAME+1] = { 0 };
+	char playerName[MAX_NBR_LETTERS_IN_PLAYERNAME + 1] = { 0 };
 } ClientToServer_Connection_TypeDef;
 
 // format des données UDP pour l'envoi de la position du joueur
 typedef struct ClientToServer_Position {
 	char heading = POSITION_HEADING;
+	long date; // permet de dater la trame pour le calcul de la latence
 	float handPos[2];
 	float headPos;
 	float punchDepth;
 	char handState; // état des mains (poings ou pas)
-	char paused; // état du joueur (recalibration régulièrement nécessaire)
+	char paused = 0; // état du joueur (recalibration régulièrement nécessaire)
 } ClientToServer_Position_TypeDef;
 
 // format des données UDP pour le lancement du jeu (serveur vers client)
 typedef struct ServerToClient_Start {
 	char heading = START_HEADING;
-	char opponentName[MAX_NBR_LETTERS_IN_PLAYERNAME+1] = { 0 };
+	char opponentName[MAX_NBR_LETTERS_IN_PLAYERNAME + 1] = { 0 };
 } ServerToClient_Start_TypeDef;
 
 
 // format des données UDP pour l'envoi des données aux clients
 typedef struct ServerToClient_Data {
 	char heading; 	// heading : P pour les données du Joueur / O pour les données de l'adversaire 
+	long date;
 	float handPos[2];
 	float headPos;
 	float punchDepth;
@@ -58,5 +60,4 @@ typedef struct ServerToClient_Data {
 	float guardBar;
 	float afterPunchDelay; // délai de réaction du joueur après le coup reçu
 } ServerToClient_Data_TypeDef;
-
 

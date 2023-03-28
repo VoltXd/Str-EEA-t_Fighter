@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <string>
-using namespace std;
 
 #include <WinSock2.h> 
 
@@ -18,11 +17,12 @@ using namespace std;
 
 class Player {
 private:
-	string name;
+	std::string name;
 	ServerToClient_Data_TypeDef lastReceivedData; // dernières données correctes reçues
 	ServerToClient_Data_TypeDef prevReceivedData; // avant-dernières données correctes reçues
-	double delayBtw2LastData; // délai entre les deux dernières données reçues 
+	long delayBtw2LastData; // délai entre les deux dernières données reçues 
 	Timer comLossesTimer; // timer pour la gestion de la perte de communication
+	Timer autoShiftingTimer; // timer pour le déplacement automatique
 
 	float leftHandPos, rightHandPos;
 	float headPos;
@@ -36,14 +36,14 @@ private:
 	float afterPunchDelay;
 
 public:
-	Player(string playerName);
+	Player(std::string playerName);
 
 	// set/get methods
 	void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
 	void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
-	void setDelayBtw2LastData(double delayBtw2LastData) { this->delayBtw2LastData = delayBtw2LastData; };
+	void setDelayBtw2LastData(long delayBtw2LastData) { this->delayBtw2LastData = delayBtw2LastData; };
 	ServerToClient_Data_TypeDef getLastReceivedData() { return lastReceivedData; };
-	string getName() { return name; };
+	std::string getName() { return name; };
 	float getLeftHandPos() { return leftHandPos; };
 	float getRightHandPos() { return rightHandPos; };
 	float getHeadPos() { return headPos; };
@@ -51,11 +51,11 @@ public:
 	float getLifeBar() { return lifeBar; };
 	float getGuardBar() { return guardBar; };
 
-	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
-	double checkTime() { return comLossesTimer.getTime(); };
+	void dataAreReceived() { comLossesTimer.start(); autoShiftingTimer.start(); }; // remise à zéro du timer
+	long checkTime() { return comLossesTimer.getTime(); };
 
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
-	void updatePosAutoShifting(float minLeftPos, float maxRightPos); 
+	void updatePosAutoShifting(float handWidth, float headWidth);
 
 	void displayPos();
 };

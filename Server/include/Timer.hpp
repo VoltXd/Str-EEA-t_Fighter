@@ -2,8 +2,8 @@
 
 #include <ctime>
 
-class Timer	{
-private : 
+class Timer {
+private:
 	bool started = false;
 	bool stopped = true;
 
@@ -13,9 +13,9 @@ private :
 
 	clock_t computeRelativeNbrTicks() { return (clock() - startNbrTicks + pauseNbrTicks); };
 
-public : 
+public:
 	Timer() {};
-	void start() { 
+	void start() {
 		startNbrTicks = clock();
 		stopped = false;
 		started = true;
@@ -30,11 +30,11 @@ public :
 		stopped = true;
 	};
 
-	double getTime() {
+	clock_t getTime() {
 		/*** retourne la valeur du timer en ms ***/
 		if (started) relativeNbrTicks = computeRelativeNbrTicks();
-		if (stopped) return 0.; 
-		return (double)relativeNbrTicks / CLOCKS_PER_SEC * 1000;
+		if (stopped) return 0;
+		return (float)relativeNbrTicks / CLOCKS_PER_SEC * 1000;
 	};
 };
 

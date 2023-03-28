@@ -10,48 +10,47 @@ int main()  {
     SOCKADDR_IN initServerSocket;
     initServerSocket.sin_family = AF_INET; initServerSocket.sin_port = htons(SERVER_PORT); initServerSocket.sin_addr.s_addr = INADDR_ANY;
 
-    ClientToServer_Connection_TypeDef connectionData;
-
     bool isStarted = false; // vrai lorsque le jeu est lancé
 
     // Initialisation Winsock version 2.2
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)  {
-        cout << "Server: WSAStartup failed with error" << WSAGetLastError() << endl;
+        std::cout << "Server: WSAStartup failed with error" << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
     else {
-        cout << "Server: The Winsock DLL status is" << wsaData.szSystemStatus << endl;
+        std::cout << "Server: The Winsock DLL status is" << wsaData.szSystemStatus << std::endl;
     }
 
     // Création du socket pour recevoir les datagrammes
     serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (serverSocket == INVALID_SOCKET) {
-        cout << "Error while creating socket : " << WSAGetLastError() << endl;
+        std::cout << "Error while creating socket : " << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
     else {
-        cout << "Socket is created !" << endl;
+        std::cout << "Socket is created !" << std::endl;
     }
 
     /* --- Liaison du socket avec l'extérieur et le port ouvert côté serveur  --- */
     if (bind(serverSocket, (SOCKADDR*)&initServerSocket, sizeof(initServerSocket)) == SOCKET_ERROR)  {
-        cout << "Error while binding socket : " << WSAGetLastError() << endl;
+        std::cout << "Error while binding socket : " << WSAGetLastError() << std::endl;
         closesocket(serverSocket);
         WSACleanup();
         return EXIT_FAILURE;
     }
     else {
-        cout << "Socket binding is completed with success" << endl;
+        std::cout << "Socket binding is completed with success" << std::endl;
     }
 
-    cout << "Server ready - Listening on port " << ntohs(initServerSocket.sin_port) << " ..." << endl;
+    std::cout << "Server ready - Listening on port " << ntohs(initServerSocket.sin_port) << " ..." << std::endl;
     /* --- */
 
     while (1) {
         Player player[2]; // les deux joueurs 
 
         /* --- phase de connexion pour les deux clients et association des joueurs aux clients --- */
-        cout << "Searching for players ..." << endl;
+        std::cout << "Searching for players ..." << std::endl;
+        ClientToServer_Connection_TypeDef connectionData;
         while (playerFromAddr.size() < 2) {
             int nbrBytesReceived = recvfrom(serverSocket, (char*)&connectionData, sizeof(connectionData),
                 0, (SOCKADDR*)&clientAddr, &clientAddrSize);
@@ -62,12 +61,13 @@ int main()  {
                 // si on reçoit une demande de connexion 
                 if ((nbrBytesReceived == sizeof(connectionData)) && (connectionData.heading == CONNECTION_HEADING)) {
                     // ajout d'un joueur seulement s'il n'est pas déjà ajouté
-                    playerFromAddr[clientAddr] = player + playerFromAddr.size();
+                    int size = playerFromAddr.size();
+                    playerFromAddr[clientAddr] = player + size;
                     playerFromAddr[clientAddr]->setName(connectionData.playerName);
                     playerFromAddr[clientAddr]->setAddr(clientAddr);
-                    cout << "Player " << playerFromAddr.size() << " connected - " 
+                    std::cout << "Player " << playerFromAddr.size() << " connected - "
                          << playerFromAddr[clientAddr]->getName() << " - " 
-                         << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << endl;
+                         << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
                 }
             }
         }
@@ -80,12 +80,12 @@ int main()  {
         // envoi au joueur 1 le nom du joueur 0 et le départ du jeu
         player[1].sendStartDatagram(serverSocket, player[0].getName());
         
-        cout << "Players are ready - Game start" << endl;
+        std::cout << "Players are ready - Game start" << std::endl;
         isStarted = true;
         /* --- */
 
         stop_flag_recvPlayerDataThread = false;
-        thread recvPlayerDataThread(recvPlayerData); // lancement du thread pour écouter les datagrammes reçus des clients
+        std::thread recvPlayerDataThread(recvPlayerData); // lancement du thread pour écouter les datagrammes reçus des clients
 
         player[0].dataAreReceived();
         player[1].dataAreReceived();
@@ -94,16 +94,16 @@ int main()  {
             /* --- stockage des données + gestion pertes de communication  + vérification fin du jeu --- */
             // gestion perte de communication générale (recv bloqué dans le thread assez longtemps)
             if (!recvDataSyncMutex.try_lock_for(timeout_duration)) { 
-                cout << "No data received from all players - Timeout reached" << endl;
+                std::cout << "No data received from all players - Timeout reached" << std::endl;
                 isStarted = false;
             }
             // gestion de la perte de communication éventuelle avec un seul joueur
             else if (player[0].checkTime() >= TIMEOUT_VALUE) {
-                cout << "No data received from player " << player[0].getName() << " - Timeout reached" << endl;
+                std::cout << "No data received from player " << player[0].getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
             else if (player[1].checkTime() >= TIMEOUT_VALUE) {
-                cout << "No data received from player " << player[1].getName() << " - Timeout reached" << endl;
+                std::cout << "No data received from player " << player[1].getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
             // ici, soit le thread est bloqué par recv, soit le mutex est accaparé
@@ -122,7 +122,7 @@ int main()  {
             /* --- */
             
             /* --- Gameplay --- */
-            Sleep(100);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             /* --- */
 
             /* --- Envoi des données mise à jour aux joueurs --- */
@@ -130,7 +130,7 @@ int main()  {
             player[1].pushCurrentPlayerData(serverSocket, player[0].getAddr());
             /* --- */
         }
-        cout << "Game stop - All players are automatically disconnected" << endl;
+        std::cout << "Game stop - All players are automatically disconnected" << std::endl;
 
         /* --- fermeture des threads --- */
         // arrêt du thread de réception
@@ -168,7 +168,7 @@ void recvPlayerData() {
         }
 
         recvDataSyncMutex.unlock();
-        this_thread::sleep_for(chrono::milliseconds(10)); // permet aux autres thread de laisser le temps d'utiliser la variable des données récupérées
+        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // permet au programme principal de lui laisser le temps d'utiliser la variable des données récupérées
     }
 }
 

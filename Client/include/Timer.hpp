@@ -15,9 +15,6 @@ private:
 
 public:
 	Timer() {};
-
-	bool isStarted() { return started; };
-
 	void start() {
 		startNbrTicks = clock();
 		stopped = false;
@@ -33,12 +30,11 @@ public:
 		stopped = true;
 	};
 
-	double getTime() {
+	clock_t getTime() {
 		/*** retourne la valeur du timer en ms ***/
 		if (started) relativeNbrTicks = computeRelativeNbrTicks();
-		if (stopped) return 0.;
-		return (double)relativeNbrTicks / CLOCKS_PER_SEC * 1000;
+		if (stopped) return 0;
+		return (float)relativeNbrTicks / CLOCKS_PER_SEC * 1000;
 	};
 };
-
 

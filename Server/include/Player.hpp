@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <string>
-using namespace std;
 
 #include <WinSock2.h> 
 
@@ -15,7 +14,7 @@ using namespace std;
 
 class Player {
 private :
-	string name;
+	std::string name;
 	SOCKADDR_IN addr;
 	ClientToServer_Position_TypeDef lastReceivedData; // dernières données correctes reçues
 	Timer comLossesTimer; // timer pour la gestion de la perte de communication
@@ -25,23 +24,23 @@ private :
 	float punchDepth;
 	char handState;
 	char paused;
-
 	float lifeBar;
 	float guardBar;
-
 	float afterPunchDelay;
+
+	long dateOfLastPullData;
 
 public :
 	Player();
 
 	// set/get methods
-	void setName(const char* name) { this->name = name; };
-	void setName(const string name) { this->name = name; };
+	void setName(const char* name) { this->name = std::string(name); };
+	void setName(const std::string& name) { this->name = std::string(name); };
 	void setAddr(SOCKADDR_IN& addr) { this->addr = addr; };
 	void setLastReceivedData(ClientToServer_Position_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
 	void setLifeBar(float lifeBar) { this->lifeBar = lifeBar; };
 	void setGuardBar(float guardBar) { this->guardBar = guardBar; };
-	string getName() { return name; };
+	std::string getName() { return name; };
 	SOCKADDR_IN& getAddr() { return addr; };
 	float getLeftHandPos() { return leftHandPos; };
 	float getRightHandPos() { return rightHandPos; };
@@ -54,9 +53,9 @@ public :
 	float getAfterPunchDelay() { return afterPunchDelay; };
 
 	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
-	double checkTime() { return comLossesTimer.getTime(); }; 
+	long checkTime() { return comLossesTimer.getTime(); }; 
 
-	void sendStartDatagram(SOCKET& socket, string opponentName); // envoi du datagramme pour le démarrage du jeu
+	void sendStartDatagram(SOCKET& socket, std::string opponentName); // envoi du datagramme pour le démarrage du jeu
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu
 	void pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr); // envoie les données actuelle de cette instance au joueur associé et à l'adversaire
 

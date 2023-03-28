@@ -1,8 +1,8 @@
 #include "Player.hpp"
 
-Player::Player(string playerName) {
+Player::Player(std::string playerName) {
 	name = playerName;
-	lastReceivedData = { LOCAL_PLAYER_HEADING, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_PUNCHDEPTH,
+	lastReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_PUNCHDEPTH,
 		INITIAL_HANDSTATE, INITIAL_LIFEBAR, INITIAL_GUARDBAR, INITIAL_AFTERPUNCHDELAY };
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
@@ -29,16 +29,10 @@ void Player::pullLastReceivedData() {
 }
 
 void Player::updatePosAutoShifting(float handWidth, float headWidth) {
-	Timer autoShiftingTimer; // timer pour le déplacement automatique
-
-	float leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / (float)delayBtw2LastData;
-	float rightHandVel = (lastReceivedData.handPos[1] - prevReceivedData.handPos[1]) / (float)delayBtw2LastData;
-	float headVel = (lastReceivedData.headPos - prevReceivedData.headPos) / (float)delayBtw2LastData;
-	float punchVel = (lastReceivedData.punchDepth - prevReceivedData.punchDepth) / (float)delayBtw2LastData;
-
-	if (!autoShiftingTimer.isStarted()) {
-		autoShiftingTimer.start();
-	}
+	float leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / delayBtw2LastData;
+	float rightHandVel = (lastReceivedData.handPos[1] - prevReceivedData.handPos[1]) / delayBtw2LastData;
+	float headVel = (lastReceivedData.headPos - prevReceivedData.headPos) / delayBtw2LastData;
+	float punchVel = (lastReceivedData.punchDepth - prevReceivedData.punchDepth) / delayBtw2LastData;
 
 	// mise à jour des positions automatiquement
 	leftHandPos += leftHandVel * autoShiftingTimer.getTime();
@@ -53,8 +47,10 @@ void Player::updatePosAutoShifting(float handWidth, float headWidth) {
 	punchDepth += punchVel * autoShiftingTimer.getTime();
 	LOWER_BOUND(punchDepth, 0);
 	UPPER_BOUND(punchDepth, 100);
+
+	autoShiftingTimer.start();
 }
 
 void Player::displayPos() {
-	cout << "left : " << leftHandPos << " - right : " << rightHandPos << endl;
+	std::cout << "left : " << leftHandPos << " - right : " << rightHandPos << std::endl;
 }

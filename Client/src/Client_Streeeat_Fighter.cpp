@@ -5,38 +5,37 @@
 
 #include "Client_Streeeat_Fighter.hpp"
 
-int main()	{
+int main(int argc, char** argv) {
     WSADATA wsaData;
 
     bool isStarted = false; // vrai lorsque le jeu est lancé
 
     // Initialisation Winsock version 2.2
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        cout << "Client: WSAStartup failed with error" << WSAGetLastError() << endl;
+        std::cout << "Client: WSAStartup failed with error" << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
     else {
-        cout << "Client: The Winsock DLL status is" << wsaData.szSystemStatus << endl;
+        std::cout << "Client: The Winsock DLL status is" << wsaData.szSystemStatus << std::endl;
     }
 
     // Création du socket pour envoyer des données au serveur (port non occupé choisi automatiquement)
     clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket == INVALID_SOCKET) {
-        cout << "Error while creating socket : " << WSAGetLastError() << endl;
+        std::cout << "Error while creating socket : " << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
     else {
-        cout << "Socket is created !" << endl;
+        std::cout << "Socket is created !" << std::endl;
     }
     
-    cout << "Client ready" << endl;
+    std::cout << "Client ready" << std::endl;
     
     /* --- Demande des informations du serveur (IP + Port) --- */
-    cout << "Server IP address : ";
-    cin >> SERVER_IP_ADDRESS;
-    cout << "Server port : ";
-    cin >> SERVER_PORT;
-
+    std::cout << "Server IP address : ";
+    std::cin >> SERVER_IP_ADDRESS;
+    std::cout << "Server port : ";
+    std::cin >> SERVER_PORT;
     /* --- */
 
     while (1) {
@@ -44,8 +43,8 @@ int main()	{
         ServerToClient_Start_TypeDef startData;
 
         /* --- Demande du nom du joueur --- */
-        cout << "Player Name (max char. = " << MAX_NBR_LETTERS_IN_PLAYERNAME << ") : ";
-        cin >> connectionData.playerName;
+        std::cout << "Player Name (max char. = " << MAX_NBR_LETTERS_IN_PLAYERNAME << ") : ";
+        std::cin >> connectionData.playerName;
         player = new Player(connectionData.playerName); // création du joueur 
         /* --- */
 
@@ -53,9 +52,9 @@ int main()	{
         serverAddr.sin_family = AF_INET; serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP_ADDRESS.c_str()); serverAddr.sin_port = htons(SERVER_PORT);
         while (1) {
             /* --- Demande de connexion au serveur --- */
-            cout << "Sending a connection request ..." << endl;
+            std::cout << "Sending a connection request ..." << std::endl;
             sendto(clientSocket, (const char*)&connectionData, sizeof(connectionData), 0, (SOCKADDR*)&serverAddr, serverAddrSize);
-            cout << "Wait for opponent ..." << endl;
+            std::cout << "Wait for opponent ..." << std::endl;
             /* --- */
 
             /* --- Vérification de la connexion de l'autre joueur en ligne --- */
@@ -63,35 +62,36 @@ int main()	{
                 0, (SOCKADDR*)&serverAddr, &serverAddrSize);
             if ((nbrBytesReceived == sizeof(startData)) && (startData.heading == START_HEADING)) {
                 opponent = new Player(startData.opponentName);
-                cout << "Opponent found : " << startData.opponentName << endl;
+                std::cout << "Opponent found : " << startData.opponentName << std::endl;
                 break;
             }
             else if (nbrBytesReceived == SOCKET_ERROR) {
-                cout << "** Connection request failed **" << endl;
+                std::cout << "** Connection request failed **" << std::endl;
             }
             /* --- */
         }
-        cout << "Game start" << endl;
+        std::cout << "Game start" << std::endl;
         isStarted = true;
+        long latency = 0;
+        app = new App(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         stop_flag_getAndSendPosThread = false;
         stop_flag_recvPlayerDataThread = false;
-        thread sendPosThread(getAndSendPos); // lancement du thread qui récupère la position et l'envoit régulièrement au serveur
-        thread recvPlayerDataThread(recvPlayerData); // lancement du thread qui récupère régulièrement les données reçues du serveur
+        std::thread sendPosThread(getAndSendPos); // lancement du thread qui récupère la position et l'envoit régulièrement au serveur
+        std::thread recvPlayerDataThread(recvPlayerData); // lancement du thread qui récupère régulièrement les données reçues du serveur
 
         player->dataAreReceived();
         opponent->dataAreReceived();
-        // récupération des données centralisées sur le serveur
         while (isStarted) {
             /* --- stockage des données + gestion pertes de communication --- */
             // gestion perte de communication avec le serveur
             recvDataSyncMutex.lock();
             if (player->checkTime() >= TIMEOUT_VALUE) {
-                cout << "No data received for the local player " << player->getName() << " - Timeout reached" << endl;
+                std::cout << "No data received for the local player " << player->getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
             if (opponent->checkTime() >= TIMEOUT_VALUE) {
-                cout << "No data received for the opponent " << opponent->getName() << " - Timeout reached" << endl;
+                std::cout << "No data received for the opponent " << opponent->getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
 
@@ -101,7 +101,7 @@ int main()	{
             }
             else {
                 // déplacement automatique tant qu'aucune autre donnée est reçue
-                player->updatePosAutoShifting(0, 100);
+                player->updatePosAutoShifting((float)HAND_WIDTH/SCREEN_WIDTH, (float)HAND_WIDTH/SCREEN_HEIGHT);
             }
             if (opponent->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
                 // stockage des dernières données correctes reçues
@@ -109,23 +109,29 @@ int main()	{
             }
             else {
                 // déplacement automatique tant qu'aucune autre donnée est reçue
-                opponent->updatePosAutoShifting(0, 100);
+                opponent->updatePosAutoShifting((float)HAND_WIDTH/SCREEN_WIDTH, (float)HAND_WIDTH/SCREEN_HEIGHT);
             }
-            cout << "leftHandPosOpp(recv) : " << opponent->getLeftHandPos() << endl;
+            latency = clock() - player->getLastReceivedData().date;
+            //std::cout << player->getLastReceivedData().date << std::endl;
+            //std::cout << "leftHandPosOpp(recv) : " << opponent->getLeftHandPos() << std::endl;
 
             recvDataSyncMutex.unlock();
             /* --- */
 
             /* --- Affichage graphique des joueurs --- */
-            Sleep(200);
+            if (app->exit()) isStarted = false;
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            app->drawRect(player->getLeftHandPos(), player->getRightHandPos(), HAND_WIDTH, {255,255,255,255});
+            std::cout << latency << std::endl;
             /* --- */
         }
-        cout << "Game stop - All players are automatically disconnected" << endl;
+        std::cout << "Game stop - All players are automatically disconnected" << std::endl;
 
         /* --- fermeture des threads --- */
         // arrêt du thread de l'envoi des positions (fin de la boucle en cours)
         stop_flag_getAndSendPosThread = true;
         sendPosThread.join();
+        delete app;
 
         // arrêt du thread de réception
         SOCKADDR_IN localhostAddr;
@@ -150,18 +156,19 @@ int main()	{
 void getAndSendPos() {
     // simulation de la position (balayage gauche droite) + envoi de la position au serveur
     ClientToServer_Position_TypeDef posDataToSend;
+    posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 50;
+    posDataToSend.punchDepth = 0; posDataToSend.handState = 1;
 
-    posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 50, posDataToSend.punchDepth = 0; posDataToSend.handState = 1;
     int direction = 1;
     while (!stop_flag_getAndSendPosThread) {
-
-        posDataToSend.handPos[0] += direction * 0.01; posDataToSend.handPos[1] -= direction * 0.01;
+        posDataToSend.date = clock();
+        posDataToSend.handPos[0] += direction * 0.5; posDataToSend.handPos[1] -= direction * 0.5;
         if ((posDataToSend.handPos[0] >= 100) || (posDataToSend.handPos[0] <= 0) || (posDataToSend.handPos[1] >= 100) || (posDataToSend.handPos[1] <= 0)) {
             direction = -direction;
         }
 
-        Sleep(30);
-        cout << "leftHandPos(sent) : " << posDataToSend.handPos[0] << endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        //std::cout << "leftHandPos(sent) : " << posDataToSend.handPos[0] << std::endl;
         sendto(clientSocket, (const char*)&posDataToSend, sizeof(posDataToSend), 0, (const sockaddr*)&serverAddr, serverAddrSize);
     }
 }
@@ -195,7 +202,7 @@ void recvPlayerData() {
         }
 
         recvDataSyncMutex.unlock();
-        this_thread::sleep_for(chrono::milliseconds(10)); // permet aux autres thread de laisser le temps d'utiliser la variable des données récupérées
+        //std::this_thread::sleep_for(std::chrono::milliseconds(5)); // permet aux autres thread de laisser le temps d'utiliser la variable des données récupérées
     }
 }
 
