@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "Scene.hpp"
+#include "Player.hpp"
 
 class SinglePlayer : public Scene
 {
@@ -15,4 +16,9 @@ class SinglePlayer : public Scene
     void input() override;
     void update() override;
     void render() override;
+    
+    SDL_Texture* m_playerHeadTexture;
+    SDL_Texture* m_playerHandTexture;
+    Player m_player;
+
 };

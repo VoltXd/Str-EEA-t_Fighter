@@ -58,7 +58,7 @@ int Button::initialise(SDL_Renderer* renderer, SDL_Texture* buttonTexture, TTF_F
     m_buttonDstRect = { x - (w / 2), y - (h / 2), w, h };
     
     // Calculate text destination rectangle 
-    const int textScale = 4;
+    const int textScale = 3;
     SDL_QueryTexture(m_textTexture, nullptr, nullptr, &m_textWidth, &m_textHeight);
     m_textWidth *= (float)h / textScale / m_textHeight;
     m_textHeight = (float)h / textScale;

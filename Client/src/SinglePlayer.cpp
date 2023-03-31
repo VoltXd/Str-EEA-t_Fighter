@@ -1,6 +1,9 @@
 #include "SinglePlayer.hpp"
 
 #include <iostream>
+#include <SDL_image.h>
+
+#include "Toolbox.hpp"
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
 {
@@ -22,11 +25,32 @@ SceneId SinglePlayer::run()
         render();
     }
 
+    // Free textures
+    SDL_DestroyTexture(m_playerHeadTexture);
+    SDL_DestroyTexture(m_playerHandTexture);
+
     return m_nextScene;
 }
 
 int SinglePlayer::initialise()
 {
+    // Load player Head 
+    m_playerHeadTexture = IMG_LoadTexture(m_renderer, "imports/images/cursor.png");
+    if (m_playerHeadTexture == nullptr)
+    {
+        SDL_ShowError("SinglePlayer Load player's head texture error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+    
+    // Load player Head 
+    m_playerHandTexture = IMG_LoadTexture(m_renderer, "imports/images/cursor.png");
+    if (m_playerHandTexture == nullptr)
+    {
+        SDL_ShowError("Single Load player's hand texture error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+
+    m_player.initialise(m_playerHeadTexture, m_playerHandTexture);
 
     return EXIT_SUCCESS;
 }
@@ -66,6 +90,8 @@ void SinglePlayer::render()
 {
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
     SDL_RenderClear(m_renderer);
+
+    m_player.render(m_renderer);
 
     SDL_RenderPresent(m_renderer);
 }

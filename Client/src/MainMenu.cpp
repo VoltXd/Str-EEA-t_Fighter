@@ -62,7 +62,7 @@ int MainMenu::initialise()
         return EXIT_FAILURE;    
     }
 
-    m_buttonFont = TTF_OpenFont("imports/fonts/Platinum_Sign.ttf", 36);
+    m_buttonFont = TTF_OpenFont("imports/fonts/Platinum_Sign.ttf", 48);
     if (m_buttonFont == nullptr)
     {
         SDL_ShowError("MainMenu Load button font error", __FILE__, __LINE__);
