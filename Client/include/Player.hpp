@@ -32,9 +32,9 @@ class Player
     inline float getHealthPoints() { return m_healthPoints; }
     inline float getStamina() { return m_stamina; }
 
-    inline void setRightHandPosition(float xRightHand) { m_xRightHand = xRightHand; }
-    inline void setLeftHandPosition(float xLeftHand) { m_xLeftHand = xLeftHand; }
-    inline void setHeadPosition(float xHead) { m_xHead = xHead; }
+    inline void setHeadPosition(float xHead) { m_xHead = xHead; setHeadTexturePosition(); }
+    inline void setRightHandPosition(float xRightHand) { m_xRightHand = xRightHand; setRightHandTexturePosition(); }
+    inline void setLeftHandPosition(float xLeftHand) { m_xLeftHand = xLeftHand; setLeftHandTexturePosition(); }
 
     inline float getRightHandPosition() { return m_xRightHand; }
     inline float getLeftHandPosition() { return m_xLeftHand; }
@@ -44,6 +44,10 @@ class Player
     void render(SDL_Renderer* renderer);
 
     private:
+    void setHeadTexturePosition();
+    void setRightHandTexturePosition();
+    void setLeftHandTexturePosition();
+
     SDL_Texture* m_headTexture;
     SDL_Texture* m_handTexture;
     SDL_Rect m_headRect;

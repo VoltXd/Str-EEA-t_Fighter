@@ -3,7 +3,13 @@
 #include <iostream>
 #include <SDL_image.h>
 
+#include "Settings.hpp"
 #include "Toolbox.hpp"
+
+// Dummy controler
+static float tempXHead = 50;
+static bool isLeftMoving = false;
+static bool isRightMoving = false;
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
 {
@@ -74,6 +80,24 @@ void SinglePlayer::input()
                     m_nextScene = SceneId::MainMenu;
                 }
                 break;
+
+            case SDL_MOUSEMOTION:
+                tempXHead = 100.0f * event.motion.x / settings.screenWidth;
+                break;
+            
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT)
+                    isLeftMoving = true;
+                else if (event.button.button == SDL_BUTTON_RIGHT)
+                    isRightMoving = true;
+                break;
+            
+            case SDL_MOUSEBUTTONUP:
+                if (event.button.button == SDL_BUTTON_LEFT)
+                    isLeftMoving = false;
+                else if (event.button.button == SDL_BUTTON_RIGHT)
+                    isRightMoving = false;
+                break;
 			
 			default:
 				break;
@@ -83,7 +107,11 @@ void SinglePlayer::input()
 
 void SinglePlayer::update()
 {
-
+    m_player.setHeadPosition(tempXHead);
+    if (isLeftMoving)
+        m_player.setLeftHandPosition(tempXHead);
+    if (isRightMoving)
+        m_player.setRightHandPosition(tempXHead);
 }
 
 void SinglePlayer::render()

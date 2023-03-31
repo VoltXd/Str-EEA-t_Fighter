@@ -63,6 +63,21 @@ bool Player::nextAction(PlayerActionStatus action)
     return false;
 }
 
+void Player::setHeadTexturePosition()
+{
+    m_headRect.x = m_xHead * 0.01 * settings.screenWidth - m_headRect.w / 2;
+}
+
+void Player::setRightHandTexturePosition()
+{
+    m_rightHandRect.x = m_xRightHand * 0.01 * settings.screenWidth - m_rightHandRect.w / 2;
+}
+
+void Player::setLeftHandTexturePosition()
+{
+    m_leftHandRect.x = m_xLeftHand * 0.01 * settings.screenWidth - m_leftHandRect.w / 2;
+}
+
 void Player::render(SDL_Renderer* renderer)
 {
     SDL_RenderCopy(renderer, m_headTexture, nullptr, &m_headRect);
