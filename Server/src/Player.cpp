@@ -4,7 +4,7 @@ Player::Player() {
 	name = "undefined";
 	addr = { 0 };
 	lastReceivedData = { POSITION_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, 
-		INITIAL_PUNCHDEPTH, INITIAL_HANDSTATE }; // position initiale
+		INITIAL_PUNCHDEPTH, INITIAL_HANDSTATE , 0}; // position initiale
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
 	rightHandPos = INITIAL_RIGHTHANDPOS;

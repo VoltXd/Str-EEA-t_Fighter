@@ -92,21 +92,17 @@ int main()  {
         while (isStarted) {
 
             /* --- stockage des données + gestion pertes de communication  + vérification fin du jeu --- */
-            // gestion perte de communication générale (recv bloqué dans le thread assez longtemps)
-            if (!recvDataSyncMutex.try_lock_for(timeout_duration)) { 
-                std::cout << "No data received from all players - Timeout reached" << std::endl;
-                isStarted = false;
-            }
-            // gestion de la perte de communication éventuelle avec un seul joueur
-            else if (player[0].checkTime() >= TIMEOUT_VALUE) {
+            recvDataSyncMutex.lock();
+
+            // gestion de la perte de communication éventuelle avec les joueurs
+            if (player[0].checkTime() >= TIMEOUT_VALUE) {
                 std::cout << "No data received from player " << player[0].getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
-            else if (player[1].checkTime() >= TIMEOUT_VALUE) {
+            if (player[1].checkTime() >= TIMEOUT_VALUE) {
                 std::cout << "No data received from player " << player[1].getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
-            // ici, soit le thread est bloqué par recv, soit le mutex est accaparé
 
             // si le jeu continue
             if (isStarted) {
@@ -122,7 +118,7 @@ int main()  {
             /* --- */
             
             /* --- Gameplay --- */
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(20));
             /* --- */
 
             /* --- Envoi des données mise à jour aux joueurs --- */
@@ -134,11 +130,11 @@ int main()  {
 
         /* --- fermeture des threads --- */
         // arrêt du thread de réception
+        stop_flag_recvPlayerDataThread = true;
         SOCKADDR_IN localhostAddr;
         localhostAddr.sin_family = AF_INET; localhostAddr.sin_port = htons(SERVER_PORT); localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST);
         sendto(serverSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, sizeof(localhostAddr)); // envoi d'un datagramme quelconque
         // en local host pour débloquer la fonction recv du thread une fois 
-        stop_flag_recvPlayerDataThread = true;
         recvPlayerDataThread.join();
         /* --- */
     }
@@ -153,10 +149,10 @@ void recvPlayerData() {
     ClientToServer_Position_TypeDef receiptBuffer; // buffer de réception de la position
     
     while (!stop_flag_recvPlayerDataThread) {
-        recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
-
         int nbrBytesReceived = recvfrom(serverSocket, (char*)&receiptBuffer, sizeof(receiptBuffer),
             0, (SOCKADDR*)&clientAddr, &clientAddrSize);
+        //std::cout << "received" << std::endl;
+        recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
 
         // si il s'agit d'un des deux joueurs qui a envoyé des données
         if (playerFromAddr.count(clientAddr)) {
@@ -168,7 +164,7 @@ void recvPlayerData() {
         }
 
         recvDataSyncMutex.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5)); // permet au programme principal de lui laisser le temps d'utiliser la variable des données récupérées
+        //std::this_thread::sleep_for(std::chrono::milliseconds(5)); // permet au programme principal de lui laisser le temps d'utiliser la variable des données récupérées
     }
 }
 

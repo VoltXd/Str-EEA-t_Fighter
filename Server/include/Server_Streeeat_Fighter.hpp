@@ -30,9 +30,7 @@ int clientAddrSize = sizeof(clientAddr);
 
 std::map<SOCKADDR_IN, Player*> playerFromAddr; // association d'un joueur à chaque client
 
-std::timed_mutex recvDataSyncMutex; // mutex pour la gestion de l'exécution du thread et l'écriture des données reçues
-const std::chrono::duration<double, std::ratio<1, 1000>> timeout_duration(TIMEOUT_VALUE); // type durée pour le timeout
-
+std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exécution du thread et l'écriture des données reçues
 
 std::atomic<bool> stop_flag_recvPlayerDataThread = false;
 void recvPlayerData();
