@@ -47,7 +47,7 @@ SceneId MainMenu::run()
 int MainMenu::initialise()
 {
     // Load background 
-    m_backgroundTexture = IMG_LoadTexture(m_renderer, "imports/images/mainmenu_background.jpg");
+    m_backgroundTexture = IMG_LoadTexture(m_renderer, "imports/images/mainmenu_background.png");
     if (m_backgroundTexture == nullptr)
     {
         SDL_ShowError("MainMenu Load background texture error", __FILE__, __LINE__);

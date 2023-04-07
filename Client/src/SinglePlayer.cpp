@@ -17,6 +17,10 @@ SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
 
     m_isRunning = true;
     m_nextScene = SceneId::MainMenu;
+
+    m_backgroundTexture = nullptr;
+    m_playerHeadTexture = nullptr;
+    m_playerHandTexture = nullptr;
 }
 
 SceneId SinglePlayer::run()
@@ -32,6 +36,7 @@ SceneId SinglePlayer::run()
     }
 
     // Free textures
+    SDL_DestroyTexture(m_backgroundTexture);
     SDL_DestroyTexture(m_playerHeadTexture);
     SDL_DestroyTexture(m_playerHandTexture);
 
@@ -40,6 +45,14 @@ SceneId SinglePlayer::run()
 
 int SinglePlayer::initialise()
 {
+    // Load background 
+    m_backgroundTexture = IMG_LoadTexture(m_renderer, "imports/images/singleplayer_background.png");
+    if (m_backgroundTexture == nullptr)
+    {
+        SDL_ShowError("SinglePlayer Load background texture error", __FILE__, __LINE__);
+        return EXIT_FAILURE;    
+    }
+
     // Load player Head 
     m_playerHeadTexture = IMG_LoadTexture(m_renderer, "imports/images/cursor.png");
     if (m_playerHeadTexture == nullptr)
@@ -57,6 +70,7 @@ int SinglePlayer::initialise()
     }
 
     m_player.initialise(m_playerHeadTexture, m_playerHandTexture);
+    m_bot.initialise(m_playerHeadTexture, m_playerHandTexture);
 
     return EXIT_SUCCESS;
 }
@@ -112,6 +126,8 @@ void SinglePlayer::update()
         m_player.setLeftHandPosition(tempXHead);
     if (isRightMoving)
         m_player.setRightHandPosition(tempXHead);
+
+    m_bot.calculateNextAction(m_player);
 }
 
 void SinglePlayer::render()
@@ -119,7 +135,10 @@ void SinglePlayer::render()
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
     SDL_RenderClear(m_renderer);
 
+    SDL_RenderCopy(m_renderer, m_backgroundTexture, nullptr, nullptr);
+
     m_player.render(m_renderer);
+    m_bot.render(m_renderer);
 
     SDL_RenderPresent(m_renderer);
 }

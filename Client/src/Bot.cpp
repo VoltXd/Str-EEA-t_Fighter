@@ -1,8 +1,8 @@
-#include "Player.hpp"
+#include "Bot.hpp"
 
 #include "Settings.hpp"
 
-Player::Player()
+Bot::Bot()
 {
     m_headTexture = nullptr;
     m_handTexture = nullptr;
@@ -21,20 +21,16 @@ Player::Player()
     m_currentActionStatus = BoxerActionStatus::Idle;
 
     m_punchTimePoint = std::chrono::high_resolution_clock::now();
-
-    m_healthBarBorder = { settings.screenWidth / 20, settings.screenHeight / 20, (int)(0.01 * START_HP * settings.screenWidth / 4), settings.screenHeight / 20 };
-    m_healthBar = m_healthBarBorder;
-    m_healthBar.w = (int)(0.01 * m_healthPoints * settings.screenWidth / 4);
 }
 
-void Player::initialise(SDL_Texture* headTexture, SDL_Texture* handTexture)
+void Bot::initialise(SDL_Texture *headTexture, SDL_Texture *handTexture)
 {
     // Save texture ptr
     m_headTexture = headTexture;
     m_handTexture = handTexture;
 
     const int MAX_PIXEL = settings.screenHeight;
-    const double HEIGHT_RATIO = 7.0 / 8.0;
+    const double HEIGHT_RATIO = 3.0 / 8.0;
 
     // Set head rectangle
     int h = MAX_PIXEL / 10;
@@ -58,15 +54,15 @@ void Player::initialise(SDL_Texture* headTexture, SDL_Texture* handTexture)
     m_leftHandRect.y = settings.screenHeight * HEIGHT_RATIO - m_leftHandRect.h / 2;
 }
 
-void Player::render(SDL_Renderer* renderer)
+void Bot::calculateNextAction(const Player& player)
+{
+    setLeftHandPosition(player.getHeadPosition());
+    setRightHandPosition(player.getHeadPosition());
+}
+
+void Bot::render(SDL_Renderer* renderer)
 {
     SDL_RenderCopy(renderer, m_headTexture, nullptr, &m_headRect);
     SDL_RenderCopy(renderer, m_handTexture, nullptr, &m_rightHandRect);
     SDL_RenderCopyEx(renderer, m_handTexture, nullptr, &m_leftHandRect, 0, nullptr, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &m_healthBar);
-    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &m_healthBarBorder);
 }
