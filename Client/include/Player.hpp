@@ -20,9 +20,8 @@ private:
 	std::string name;
 	ServerToClient_Data_TypeDef lastReceivedData; // dernières données correctes reçues
 	ServerToClient_Data_TypeDef prevReceivedData; // avant-dernières données correctes reçues
-	long delayBtw2LastData; // délai entre les deux dernières données reçues 
-	Timer comLossesTimer; // timer pour la gestion de la perte de communication
-	Timer autoShiftingTimer; // timer pour le déplacement automatique
+	Timer<std::chrono::milliseconds> comTimer; // timer pour la gestion de la communication par rapport au temps
+	Timer<std::chrono::microseconds> autoShiftingTimer; // timer pour la gestion du déplacement automatique
 
 	float leftHandPos, rightHandPos;
 	float headPos;
@@ -35,14 +34,20 @@ private:
 
 	float afterPunchDelay;
 
+	// vitesses pour le déplacement automatique
+	float leftHandVel;
+	float rightHandVel;
+	float headVel;
+	float punchVel;
+
 public:
 	Player(std::string playerName);
 
 	// set/get methods
 	void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
 	void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
-	void setDelayBtw2LastData(long delayBtw2LastData) { this->delayBtw2LastData = delayBtw2LastData; };
-	ServerToClient_Data_TypeDef getLastReceivedData() { return lastReceivedData; };
+	ServerToClient_Data_TypeDef& getLastReceivedData() { return lastReceivedData; };
+	ServerToClient_Data_TypeDef& getPrevReceivedData() { return prevReceivedData; };
 	std::string getName() { return name; };
 	float getLeftHandPos() { return leftHandPos; };
 	float getRightHandPos() { return rightHandPos; };
@@ -51,10 +56,11 @@ public:
 	float getLifeBar() { return lifeBar; };
 	float getGuardBar() { return guardBar; };
 
-	void dataAreReceived() { comLossesTimer.start(); autoShiftingTimer.start(); }; // remise à zéro du timer
-	long checkTime() { return comLossesTimer.getTime(); };
+	void dataAreReceived() { comTimer.start(); }; // remise à zéro du timer
+	unsigned long long checkTime() { return comTimer.getTime(); };
 
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
+	void setAutoShiftingParameters(); // met à jour les paramètres du déplacement automatique
 	void updatePosAutoShifting(float handWidth, float headWidth);
 
 	void displayPos();

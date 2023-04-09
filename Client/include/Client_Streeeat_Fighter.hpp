@@ -5,6 +5,7 @@
 
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32.lib")
+#include <chrono>
 
 #include <thread>
 #include <mutex>
@@ -21,8 +22,8 @@
 #define HAND_WIDTH 50
 
 
-#define TIMEOUT_VALUE 3000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
-#define DELAY_BEFORE_AUTO_SHIFTING 30 /* temps (ms) à partir duquel le mouvement n'est plus actualisé par les données reçues 
+#define TIMEOUT_VALUE 5000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
+#define DELAY_BEFORE_AUTO_SHIFTING 250 /* temps (ms) à partir duquel le mouvement n'est plus actualisé par les données reçues 
  mais par déplacement automatique en fonction de la vitesse précedente */
 
 #define LOCAL_HOST "127.0.0.1"

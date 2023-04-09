@@ -10,15 +10,14 @@
 
 #include <thread>
 #include <mutex>
-
-#include <ctime>
+#include <chrono>
 
 #include "Data_structs.hpp"
 #include "Player.hpp"
 #include "Gameplay.hpp"
 #include "Timer.hpp"
 
-#define TIMEOUT_VALUE 3000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
+#define TIMEOUT_VALUE 5000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
 
 #define SERVER_PORT 50000
 
@@ -31,6 +30,7 @@ int clientAddrSize = sizeof(clientAddr);
 std::map<SOCKADDR_IN, Player*> playerFromAddr; // association d'un joueur à chaque client
 
 std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exécution du thread et l'écriture des données reçues
+std::atomic<bool> dataReceived = false;
 
 std::atomic<bool> stop_flag_recvPlayerDataThread = false;
 void recvPlayerData();

@@ -1,40 +1,40 @@
 #pragma once
 
-#include <ctime>
+#include <chrono>
 
+using clk = std::chrono::high_resolution_clock;
+
+template<class durationType>
 class Timer {
 private:
-	bool started = false;
-	bool stopped = true;
+	bool started;
 
-	clock_t startNbrTicks = 0; // nombre de pulsations (absolu) lors du démarrage du timer 
-	clock_t pauseNbrTicks = 0; // nombre de pulsations relatives écoulées au moment de la pause du timer
-	clock_t relativeNbrTicks = 0; // nombre de pulsations relatives au démarrage du timer (et avec prise en compte des pauses)
+	clk::time_point startNbrTicks; // temps lors du dernier démarrage du timer 
+	clk::duration relativeNbrTicks; // temps actuel
 
-	clock_t computeRelativeNbrTicks() { return (clock() - startNbrTicks + pauseNbrTicks); };
+	clk::duration computeRelativeNbrTicks() {
+		return (clk::now() - startNbrTicks);
+	};
 
 public:
-	Timer() {};
+	Timer<durationType>() { started = false; };
+
 	void start() {
-		startNbrTicks = clock();
-		stopped = false;
+		startNbrTicks = clk::now();
 		started = true;
 	};
-	void pause() {
-		pauseNbrTicks = computeRelativeNbrTicks();
-		started = false;
-	};
 	void stop() {
-		pauseNbrTicks = 0;
 		started = false;
-		stopped = true;
 	};
 
-	clock_t getTime() {
-		/*** retourne la valeur du timer en ms ***/
-		if (started) relativeNbrTicks = computeRelativeNbrTicks();
-		if (stopped) return 0;
-		return (float)relativeNbrTicks / CLOCKS_PER_SEC * 1000;
+	unsigned long long getTime() {
+		/*** retourne la valeur du timer ***/
+		if (!started) {
+			return 0;
+		}
+		relativeNbrTicks = computeRelativeNbrTicks();
+		return std::chrono::duration_cast<durationType>(relativeNbrTicks).count();
 	};
 };
+
 

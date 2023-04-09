@@ -17,9 +17,7 @@ int main()  {
         std::cout << "Server: WSAStartup failed with error" << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
-    else {
-        std::cout << "Server: The Winsock DLL status is" << wsaData.szSystemStatus << std::endl;
-    }
+    std::cout << "Server: The Winsock DLL status is" << wsaData.szSystemStatus << std::endl;
 
     // Création du socket pour recevoir les datagrammes
     serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -27,10 +25,8 @@ int main()  {
         std::cout << "Error while creating socket : " << WSAGetLastError() << std::endl;
         return EXIT_FAILURE;
     }
-    else {
-        std::cout << "Socket is created !" << std::endl;
-    }
-
+    std::cout << "Socket is created !" << std::endl;
+    
     /* --- Liaison du socket avec l'extérieur et le port ouvert côté serveur  --- */
     if (bind(serverSocket, (SOCKADDR*)&initServerSocket, sizeof(initServerSocket)) == SOCKET_ERROR)  {
         std::cout << "Error while binding socket : " << WSAGetLastError() << std::endl;
@@ -93,7 +89,6 @@ int main()  {
 
             /* --- stockage des données + gestion pertes de communication  + vérification fin du jeu --- */
             recvDataSyncMutex.lock();
-
             // gestion de la perte de communication éventuelle avec les joueurs
             if (player[0].checkTime() >= TIMEOUT_VALUE) {
                 std::cout << "No data received from player " << player[0].getName() << " - Timeout reached" << std::endl;
@@ -103,17 +98,12 @@ int main()  {
                 std::cout << "No data received from player " << player[1].getName() << " - Timeout reached" << std::endl;
                 isStarted = false;
             }
-
-            // si le jeu continue
-            if (isStarted) {
-                // stockage des dernières données correctes reçues
-                player[0].pullLastReceivedData();
-                player[1].pullLastReceivedData();
-            }
-            else {
-                playerFromAddr.clear(); // suppression des joueurs
-            }
-
+            // ici soit le mutex est accaparé soit le thread est bloqué par recv (aucune réception et on coupe la connexion)
+           
+            // stockage des dernières données correctes reçues
+            player[0].pullLastReceivedData();
+            player[1].pullLastReceivedData();
+           
             recvDataSyncMutex.unlock();
             /* --- */
             
@@ -136,6 +126,8 @@ int main()  {
         sendto(serverSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, sizeof(localhostAddr)); // envoi d'un datagramme quelconque
         // en local host pour débloquer la fonction recv du thread une fois 
         recvPlayerDataThread.join();
+
+        playerFromAddr.clear(); // suppression des joueurs
         /* --- */
     }
 
@@ -145,21 +137,21 @@ int main()  {
 }
 
 void recvPlayerData() {
-    /* --- Récupération des données reçues des joueurs --- */
-    ClientToServer_Position_TypeDef receiptBuffer; // buffer de réception de la position
-    
-    while (!stop_flag_recvPlayerDataThread) {
+    while (!stop_flag_recvPlayerDataThread.load()) {
+        ClientToServer_Position_TypeDef receiptBuffer; // buffer de réception de la position
+
         int nbrBytesReceived = recvfrom(serverSocket, (char*)&receiptBuffer, sizeof(receiptBuffer),
             0, (SOCKADDR*)&clientAddr, &clientAddrSize);
-        //std::cout << "received" << std::endl;
+
         recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
 
         // si il s'agit d'un des deux joueurs qui a envoyé des données
         if (playerFromAddr.count(clientAddr)) {
             // si il s'agit bien des données de position formattées correctement
-            if ((nbrBytesReceived == sizeof(receiptBuffer)) && (receiptBuffer.heading == POSITION_HEADING)) {
+            if ((nbrBytesReceived == sizeof(receiptBuffer)) && (receiptBuffer.heading == POSITION_HEADING) && (playerFromAddr.count(clientAddr) == 1)) {
                 playerFromAddr[clientAddr]->setLastReceivedData(receiptBuffer);
                 playerFromAddr[clientAddr]->dataAreReceived();
+
             }
         }
 

@@ -32,7 +32,7 @@ typedef struct ClientToServer_Connection {
 // format des données UDP pour l'envoi de la position du joueur
 typedef struct ClientToServer_Position {
 	char heading = POSITION_HEADING;
-	long date; // permet de dater la trame pour le calcul de la latence
+	unsigned long long date; // permet de dater la trame pour le calcul de la latence
 	float handPos[2];
 	float headPos;
 	float punchDepth;
@@ -50,7 +50,7 @@ typedef struct ServerToClient_Start {
 // format des données UDP pour l'envoi des données aux clients
 typedef struct ServerToClient_Data {
 	char heading; 	// heading : P pour les données du Joueur / O pour les données de l'adversaire 
-	long date;
+	unsigned long long date;
 	float handPos[2];
 	float headPos;
 	float punchDepth;
@@ -60,4 +60,5 @@ typedef struct ServerToClient_Data {
 	float guardBar;
 	float afterPunchDelay; // délai de réaction du joueur après le coup reçu
 } ServerToClient_Data_TypeDef;
+
 

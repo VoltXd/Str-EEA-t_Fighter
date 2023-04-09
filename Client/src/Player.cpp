@@ -2,7 +2,7 @@
 
 Player::Player(std::string playerName) {
 	name = playerName;
-	lastReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_PUNCHDEPTH,
+	prevReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_PUNCHDEPTH,
 		INITIAL_HANDSTATE, 0, INITIAL_LIFEBAR, INITIAL_GUARDBAR, INITIAL_AFTERPUNCHDELAY };
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
@@ -14,6 +14,8 @@ Player::Player(std::string playerName) {
 	lifeBar = INITIAL_LIFEBAR;
 	guardBar = INITIAL_GUARDBAR;
 	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
+
+	autoShiftingTimer.start();
 }
 
 void Player::pullLastReceivedData() {
@@ -28,12 +30,18 @@ void Player::pullLastReceivedData() {
 	afterPunchDelay = lastReceivedData.afterPunchDelay;
 }
 
-void Player::updatePosAutoShifting(float handWidth, float headWidth) {
-	float leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / delayBtw2LastData;
-	float rightHandVel = (lastReceivedData.handPos[1] - prevReceivedData.handPos[1]) / delayBtw2LastData;
-	float headVel = (lastReceivedData.headPos - prevReceivedData.headPos) / delayBtw2LastData;
-	float punchVel = (lastReceivedData.punchDepth - prevReceivedData.punchDepth) / delayBtw2LastData;
+void Player::setAutoShiftingParameters() {
+	unsigned long long delayBtw2LastData = autoShiftingTimer.getTime();
 
+	leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / delayBtw2LastData;
+	rightHandVel = (lastReceivedData.handPos[1] - prevReceivedData.handPos[1]) / delayBtw2LastData;
+	headVel = (lastReceivedData.headPos - prevReceivedData.headPos) / delayBtw2LastData;
+	punchVel = (lastReceivedData.punchDepth - prevReceivedData.punchDepth) / delayBtw2LastData;
+
+	autoShiftingTimer.start();
+}
+
+void Player::updatePosAutoShifting(float handWidth, float headWidth) {
 	// mise à jour des positions automatiquement
 	leftHandPos += leftHandVel * autoShiftingTimer.getTime();
 	LOWER_BOUND(leftHandPos, handWidth/2);
@@ -47,8 +55,6 @@ void Player::updatePosAutoShifting(float handWidth, float headWidth) {
 	punchDepth += punchVel * autoShiftingTimer.getTime();
 	LOWER_BOUND(punchDepth, 0);
 	UPPER_BOUND(punchDepth, 100);
-
-	autoShiftingTimer.start();
 }
 
 void Player::displayPos() {

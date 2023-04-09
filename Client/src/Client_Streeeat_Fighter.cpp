@@ -72,7 +72,6 @@ int main(int argc, char** argv) {
         }
         std::cout << "Game start" << std::endl;
         isStarted = true;
-        long latency = 0;
         app = new App(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         stop_flag_getAndSendPosThread = false;
@@ -95,9 +94,18 @@ int main(int argc, char** argv) {
                 isStarted = false;
             }
 
-            if (player->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
+            player->pullLastReceivedData();
+            player->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
+            opponent->pullLastReceivedData();
+            opponent->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
+         
+            /*if (player->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
                 // stockage des dernières données correctes reçues
                 player->pullLastReceivedData();
+
+                // calcul de la latence par rapport à la dernière trame reçue
+                
+                //std::cout << latency << std::endl;
             }
             else {
                 // déplacement automatique tant qu'aucune autre donnée est reçue
@@ -110,19 +118,15 @@ int main(int argc, char** argv) {
             else {
                 // déplacement automatique tant qu'aucune autre donnée est reçue
                 opponent->updatePosAutoShifting((float)HAND_WIDTH/SCREEN_WIDTH, (float)HAND_WIDTH/SCREEN_HEIGHT);
-            }
-            latency = clock() - player->getLastReceivedData().date;
-            //std::cout << player->getLastReceivedData().date << std::endl;
-            //std::cout << "leftHandPosOpp(recv) : " << opponent->getLeftHandPos() << std::endl;
+            }*/
 
             recvDataSyncMutex.unlock();
             /* --- */
 
             /* --- Affichage graphique des joueurs --- */
             if (app->exit()) isStarted = false;
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             app->drawRect(player->getLeftHandPos(), player->getRightHandPos(), HAND_WIDTH, {255,255,255,255});
-            std::cout << latency << std::endl;
             /* --- */
         }
         std::cout << "Game stop - All players are automatically disconnected" << std::endl;
@@ -134,13 +138,13 @@ int main(int argc, char** argv) {
         delete app;
 
         // arrêt du thread de réception
+        stop_flag_recvPlayerDataThread = true;
         SOCKADDR_IN localhostAddr;
         int localhostAddrLength = sizeof(localhostAddr);
         getsockname(clientSocket, (SOCKADDR*)&localhostAddr, &localhostAddrLength); // récupération du port associé au socket
         localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST); // adresse local
         sendto(clientSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, localhostAddrLength); // envoi d'un datagramme quelconque
         // en local host pour débloquer la fonction recv du thread une fois
-        stop_flag_recvPlayerDataThread = true;
         recvPlayerDataThread.join();
         /* --- */
 
@@ -156,53 +160,72 @@ int main(int argc, char** argv) {
 void getAndSendPos() {
     // simulation de la position (balayage gauche droite) + envoi de la position au serveur
     ClientToServer_Position_TypeDef posDataToSend;
-    posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 50;
-    posDataToSend.punchDepth = 0; posDataToSend.handState = 1;
+    posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 0;
+    posDataToSend.punchDepth = 0; posDataToSend.handState = 0; posDataToSend.paused = 0;
 
-    int direction = 1;
-    while (!stop_flag_getAndSendPosThread) {
-        posDataToSend.date = clock();
-        posDataToSend.handPos[0] += direction * 0.5; posDataToSend.handPos[1] -= direction * 0.5;
+    float direction = 0.005;
+    while (!stop_flag_getAndSendPosThread.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        direction *= 1.10;
+        posDataToSend.handPos[0] += direction * 1; posDataToSend.handPos[1] -= direction * 1;
         if ((posDataToSend.handPos[0] >= 100) || (posDataToSend.handPos[0] <= 0) || (posDataToSend.handPos[1] >= 100) || (posDataToSend.handPos[1] <= 0)) {
             direction = -direction;
         }
+        posDataToSend.date = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
         //std::cout << "leftHandPos(sent) : " << posDataToSend.handPos[0] << std::endl;
         sendto(clientSocket, (const char*)&posDataToSend, sizeof(posDataToSend), 0, (const sockaddr*)&serverAddr, serverAddrSize);
     }
 }
 
 void recvPlayerData() {
-    ServerToClient_Data_TypeDef receiptBuffer; // buffer de réception des données d'un joueur
+    unsigned long long latency = 0;
 
-    while (!stop_flag_recvPlayerDataThread) {
+    while (!stop_flag_recvPlayerDataThread.load()) {
+        ServerToClient_Data_TypeDef receiptBuffer; // buffer de réception des données d'un joueur
+
         int nbrBytesReceived = recvfrom(clientSocket, (char*)&receiptBuffer, sizeof(receiptBuffer),
             0, (SOCKADDR*)&serverAddr, &serverAddrSize);
-
-        recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
 
         // si les données sont formattées correctement
         if (nbrBytesReceived == sizeof(receiptBuffer)) {
             switch (receiptBuffer.heading) {
             case LOCAL_PLAYER_HEADING:
+                recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
                 player->setPrevReceivedData(player->getLastReceivedData());
                 player->setLastReceivedData(receiptBuffer);
-                player->setDelayBtw2LastData(player->checkTime());
+                
+                // si les dernières données reçues sont des nouvelles données et non pas les mêmes (données de position uniquement)
+                if (player->getLastReceivedData().date != player->getPrevReceivedData().date) {
+                    // calcul de la latence
+                    std::chrono::microseconds date(player->getLastReceivedData().date);
+                    latency = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()) - date).count();
+                    std::cout << "Latency : " << latency << std::endl;
+
+                    // mise à jour des paramètres pour le déplacement
+                    player->setAutoShiftingParameters();
+                }
+
                 player->dataAreReceived();
+                recvDataSyncMutex.unlock();
                 break;
             case OPPOSING_PLAYER_HEADING:
+                recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
                 opponent->setPrevReceivedData(opponent->getLastReceivedData());
                 opponent->setLastReceivedData(receiptBuffer);
-                opponent->setDelayBtw2LastData(opponent->checkTime());
+
+                if (opponent->getLastReceivedData().date != opponent->getPrevReceivedData().date) {
+                    // mise à jour des paramètres pour le déplacement
+                    opponent->setAutoShiftingParameters();
+                }
+                
                 opponent->dataAreReceived();
+                recvDataSyncMutex.unlock();
                 break;
             default: break;
             }
         }
-
-        recvDataSyncMutex.unlock();
-        //std::this_thread::sleep_for(std::chrono::milliseconds(5)); // permet aux autres thread de laisser le temps d'utiliser la variable des données récupérées
     }
 }
 
