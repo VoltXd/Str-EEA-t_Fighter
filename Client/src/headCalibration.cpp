@@ -1,7 +1,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "headCalibration.h"
+#include "headCalibration.hpp"
 
 cv::Mat headCalibration(cv::Point centerEllipse, cv::Size sizeEllipse, cv::Mat& image) {
 	cv::Mat cropped = cv::Mat::zeros(image.size(), CV_8UC3);

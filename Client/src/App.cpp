@@ -72,16 +72,18 @@ bool App::exit()
 	return false;
 }
 
-void App::drawRect(float x1, float x2, int handSize, SDL_Color color)
+void App::drawRect(float x1, float x2, int size, SDL_Color color)
 {
-	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(m_renderer);
-
-	SDL_Rect rect1{ x1*m_screenWidth/100 - handSize / 2, m_screenHeight/2 - handSize/2, handSize, handSize };
-	SDL_Rect rect2{ x2* m_screenWidth / 100 - handSize / 2, m_screenHeight / 2 - handSize / 2, handSize, handSize };
+	SDL_Rect rect1{ x1*m_screenWidth/100 - size / 2, x2*m_screenHeight/100 - size/2, size, size };
 	SDL_SetRenderDrawColor(m_renderer, color.r, color.g , color.b, color.a);
 	SDL_RenderFillRect(m_renderer, &rect1);
-	SDL_RenderFillRect(m_renderer, &rect2);
+}
 
+void App::renderClear() {
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(m_renderer);
+}
+
+void App::renderPresent() {
 	SDL_RenderPresent(m_renderer);
 }

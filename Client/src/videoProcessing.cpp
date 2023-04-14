@@ -2,9 +2,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
-#include "headCalibration.h"
-#include "headCorrelationTracking.h"
-#include "handTracking.h"
+#include "headCalibration.hpp"
+#include "headCorrelationTracking.hpp"
+#include "handTracking.hpp"
 
 
 

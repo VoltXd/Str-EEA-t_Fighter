@@ -17,7 +17,7 @@
 #include "Gameplay.hpp"
 #include "Timer.hpp"
 
-#define TIMEOUT_VALUE 1000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
+#define TIMEOUT_VALUE 4000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
 
 #define SERVER_PORT 50000
 

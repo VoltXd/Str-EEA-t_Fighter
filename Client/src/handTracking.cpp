@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
-#include "handTracking.h"
+#include "handTracking.hpp"
 
 cv::Mat RGBtorgb(cv::Mat& image) {
 	cv::Mat rgbImage = cv::Mat::zeros(image.size(), CV_32FC3);

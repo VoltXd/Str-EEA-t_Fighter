@@ -1,12 +1,11 @@
 #pragma once
 
+// partie communication client-serveur 
 #include <iostream>
 #include <string>
-
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <chrono>
-
 #include <thread>
 #include <mutex>
 
@@ -15,16 +14,21 @@
 #include "Player.hpp"
 #include "Timer.hpp"
 
+// partie traitement video
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
+#include "headCalibration.hpp"
+#include "headCorrelationTracking.hpp"
+#include "handTracking.hpp"
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
 #define HAND_WIDTH 50
 
-
-#define TIMEOUT_VALUE 5000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
-#define DELAY_BEFORE_AUTO_SHIFTING 250 /* temps (ms) à partir duquel le mouvement n'est plus actualisé par les données reçues 
- mais par déplacement automatique en fonction de la vitesse précedente */
+#define TIMEOUT_VALUE 4000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
 
 #define LOCAL_HOST "127.0.0.1"
 
