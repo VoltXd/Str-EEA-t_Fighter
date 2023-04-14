@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
     while (1) {
         ClientToServer_Connection_TypeDef connectionData;
-        ServerToClient_Start_TypeDef startData;
+        ServerToClient_Start_TypeDef startData = { 0, {0} };
 
         /* --- Demande du nom du joueur --- */
         std::cout << "Player Name (max char. = " << MAX_NBR_LETTERS_IN_PLAYERNAME << ") : ";
@@ -50,26 +50,23 @@ int main(int argc, char** argv) {
 
         // connexion au serveur et attente de l'autre joueur
         serverAddr.sin_family = AF_INET; serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP_ADDRESS.c_str()); serverAddr.sin_port = htons(SERVER_PORT);
-        while (1) {
-            /* --- Demande de connexion au serveur --- */
-            std::cout << "Sending a connection request ..." << std::endl;
-            sendto(clientSocket, (const char*)&connectionData, sizeof(connectionData), 0, (SOCKADDR*)&serverAddr, serverAddrSize);
-            std::cout << "Wait for opponent ..." << std::endl;
-            /* --- */
+        
+        /* --- Demande de connexion au serveur --- */
+        std::cout << "Sending a connection request ..." << std::endl;
+        sendto(clientSocket, (const char*)&connectionData, sizeof(connectionData), 0, (SOCKADDR*)&serverAddr, serverAddrSize);
+        std::cout << "Wait for opponent ..." << std::endl;
+        /* --- */
 
-            /* --- Vérification de la connexion de l'autre joueur en ligne --- */
-            int nbrBytesReceived = recvfrom(clientSocket, (char*)&startData, sizeof(startData),
+        /* --- Attente de la connexion de l'autre joueur en ligne --- */
+        int nbrBytesReceived = 0;
+        while ((nbrBytesReceived != sizeof(startData)) || (startData.heading != START_HEADING)) {
+            nbrBytesReceived = recvfrom(clientSocket, (char*)&startData, sizeof(startData),
                 0, (SOCKADDR*)&serverAddr, &serverAddrSize);
-            if ((nbrBytesReceived == sizeof(startData)) && (startData.heading == START_HEADING)) {
-                opponent = new Player(startData.opponentName);
-                std::cout << "Opponent found : " << startData.opponentName << std::endl;
-                break;
-            }
-            else if (nbrBytesReceived == SOCKET_ERROR) {
-                std::cout << "** Connection request failed **" << std::endl;
-            }
-            /* --- */
         }
+        opponent = new Player(startData.opponentName);
+        std::cout << "Opponent found : " << startData.opponentName << std::endl;
+        /* --- */
+
         std::cout << "Game start" << std::endl;
         isStarted = true;
         app = new App(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -98,27 +95,6 @@ int main(int argc, char** argv) {
             player->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
             opponent->pullLastReceivedData();
             opponent->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
-         
-            /*if (player->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
-                // stockage des dernières données correctes reçues
-                player->pullLastReceivedData();
-
-                // calcul de la latence par rapport à la dernière trame reçue
-                
-                //std::cout << latency << std::endl;
-            }
-            else {
-                // déplacement automatique tant qu'aucune autre donnée est reçue
-                player->updatePosAutoShifting((float)HAND_WIDTH/SCREEN_WIDTH, (float)HAND_WIDTH/SCREEN_HEIGHT);
-            }
-            if (opponent->checkTime() <= DELAY_BEFORE_AUTO_SHIFTING) {
-                // stockage des dernières données correctes reçues
-                opponent->pullLastReceivedData();
-            }
-            else {
-                // déplacement automatique tant qu'aucune autre donnée est reçue
-                opponent->updatePosAutoShifting((float)HAND_WIDTH/SCREEN_WIDTH, (float)HAND_WIDTH/SCREEN_HEIGHT);
-            }*/
 
             recvDataSyncMutex.unlock();
             /* --- */
@@ -129,13 +105,13 @@ int main(int argc, char** argv) {
             app->drawRect(player->getLeftHandPos(), player->getRightHandPos(), HAND_WIDTH, {255,255,255,255});
             /* --- */
         }
+        delete app;
         std::cout << "Game stop - All players are automatically disconnected" << std::endl;
 
         /* --- fermeture des threads --- */
         // arrêt du thread de l'envoi des positions (fin de la boucle en cours)
         stop_flag_getAndSendPosThread = true;
         sendPosThread.join();
-        delete app;
 
         // arrêt du thread de réception
         stop_flag_recvPlayerDataThread = true;
