@@ -21,7 +21,7 @@ private :
 
 	float leftHandPos, rightHandPos;
 	float headPos;
-	float punchDepth;
+	float leftHandDepth, rightHandDepth;
 	char handState;
 	char paused;
 	float lifeBar;
@@ -47,7 +47,8 @@ public :
 	float getHeadPos() { return headPos; };
 	char getHandState() { return handState; };
 	char getPaused() { return paused; };
-	float getPunchDepth() { return punchDepth; };
+	float getLeftHandDepth() { return leftHandDepth; };
+	float getRightHandDepth() { return rightHandDepth; };
 	float getLifeBar() { return lifeBar; };
 	float getGuardBar() { return guardBar; };
 	float getAfterPunchDelay() { return afterPunchDelay; };

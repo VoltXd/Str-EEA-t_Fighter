@@ -140,7 +140,7 @@ void getAndSendPos() {
     // Trame de position pour l'envoi au serveur
     ClientToServer_Position_TypeDef posDataToSend;
     posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 0;
-    posDataToSend.punchDepth = 0; posDataToSend.handState = 0; posDataToSend.paused = 0;
+    posDataToSend.handDepth[0] = 0; posDataToSend.handDepth[1] = 0; posDataToSend.handState = 0; posDataToSend.paused = 0;
 
     /* --- OpenCV objects --- */
     cv::Mat frame, croppedHead, screenshotCalibration;

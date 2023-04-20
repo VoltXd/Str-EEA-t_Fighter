@@ -17,7 +17,7 @@
 #define INITIAL_LEFTHANDPOS 45
 #define INITIAL_RIGHTHANDPOS 55
 #define INITIAL_HEADPOS 50
-#define INITIAL_PUNCHDEPTH 0
+#define INITIAL_HANDDEPTH 0
 #define INITIAL_HANDSTATE 0
 #define INITIAL_LIFEBAR 100
 #define INITIAL_GUARDBAR 100
@@ -35,8 +35,8 @@ typedef struct ClientToServer_Position {
 	unsigned long long date; // permet de dater la trame pour le calcul de la latence
 	float handPos[2];
 	float headPos;
-	float punchDepth;
-	char handState; // état des mains (poings ou pas)
+	float handDepth[2];
+	char handState; 
 	char paused = 0; // état du joueur (recalibration régulièrement nécessaire)
 } ClientToServer_Position_TypeDef;
 
@@ -53,8 +53,8 @@ typedef struct ServerToClient_Data {
 	unsigned long long date;
 	float handPos[2];
 	float headPos;
-	float punchDepth;
-	char handState; // état des mains (poings ou pas)
+	float handDepth[2];
+	char handState;
 	char paused;
 	float lifeBar;
 	float guardBar;

@@ -25,7 +25,8 @@ private:
 
 	float leftHandPos, rightHandPos;
 	float headPos;
-	float punchDepth;
+	float leftHandDepth;
+	float rightHandDepth;
 	char handState;
 	char paused;
 
@@ -38,7 +39,8 @@ private:
 	float leftHandVel;
 	float rightHandVel;
 	float headVel;
-	float punchVel;
+	float leftHandDepthVel;
+	float rightHandDepthVel;
 
 public:
 	Player(std::string playerName);
@@ -52,7 +54,8 @@ public:
 	float getLeftHandPos() { return leftHandPos; };
 	float getRightHandPos() { return rightHandPos; };
 	float getHeadPos() { return headPos; };
-	float getPunchDepth() { return punchDepth; };
+	float getLeftHandDepth() { return leftHandDepth; };
+	float getRightHandDepth() { return rightHandDepth; };
 	float getLifeBar() { return lifeBar; };
 	float getGuardBar() { return guardBar; };
 

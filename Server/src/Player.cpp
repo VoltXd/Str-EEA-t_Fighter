@@ -4,12 +4,13 @@ Player::Player() {
 	name = "undefined";
 	addr = { 0 };
 	lastReceivedData = { POSITION_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, 
-		INITIAL_PUNCHDEPTH, INITIAL_HANDSTATE , 0}; // position initiale
+		{INITIAL_HANDDEPTH, INITIAL_HANDDEPTH}, INITIAL_HANDSTATE , 0 }; // position initiale
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
 	rightHandPos = INITIAL_RIGHTHANDPOS;
 	headPos = INITIAL_HEADPOS;
-	punchDepth = INITIAL_PUNCHDEPTH;
+	leftHandDepth = INITIAL_HANDDEPTH;
+	rightHandDepth = INITIAL_HANDDEPTH;
 	handState = INITIAL_HANDSTATE;
 	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
@@ -30,7 +31,8 @@ void Player::pullLastReceivedData() {
 	leftHandPos = lastReceivedData.handPos[0];
 	rightHandPos = lastReceivedData.handPos[1];
 	headPos = lastReceivedData.headPos;
-	punchDepth = lastReceivedData.punchDepth;
+	leftHandDepth = lastReceivedData.handDepth[0];
+	rightHandDepth = lastReceivedData.handDepth[1];
 	handState = lastReceivedData.handState;
 	paused = lastReceivedData.paused;
 }
@@ -43,7 +45,8 @@ void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
 	playerData.handPos[0] = getLeftHandPos();
 	playerData.handPos[1] = getRightHandPos();
 	playerData.headPos = getHeadPos();
-	playerData.punchDepth = getPunchDepth();
+	playerData.handDepth[0] = getLeftHandDepth();
+	playerData.handDepth[1] = getRightHandDepth();
 	playerData.handState = getHandState();
 	playerData.paused = getPaused();
 	playerData.lifeBar = getLifeBar();

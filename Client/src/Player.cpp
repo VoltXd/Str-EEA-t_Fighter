@@ -2,13 +2,14 @@
 
 Player::Player(std::string playerName) {
 	name = playerName;
-	prevReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_PUNCHDEPTH,
+	prevReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, {INITIAL_HANDDEPTH, INITIAL_HANDDEPTH},
 		INITIAL_HANDSTATE, 0, INITIAL_LIFEBAR, INITIAL_GUARDBAR, INITIAL_AFTERPUNCHDELAY };
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
 	rightHandPos = INITIAL_RIGHTHANDPOS;
 	headPos = INITIAL_HEADPOS;
-	punchDepth = INITIAL_PUNCHDEPTH;
+	leftHandDepth = INITIAL_HANDDEPTH;
+	rightHandDepth = INITIAL_HANDDEPTH;
 	handState = INITIAL_HANDSTATE;
 	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
@@ -22,7 +23,8 @@ void Player::pullLastReceivedData() {
 	leftHandPos = lastReceivedData.handPos[0];
 	rightHandPos = lastReceivedData.handPos[1];
 	headPos = lastReceivedData.headPos;
-	punchDepth = lastReceivedData.punchDepth;
+	leftHandDepth = lastReceivedData.handDepth[0];
+	rightHandDepth = lastReceivedData.handDepth[1];
 	handState = lastReceivedData.handState;
 	paused = lastReceivedData.paused;
 	lifeBar = lastReceivedData.lifeBar;
@@ -36,7 +38,8 @@ void Player::setAutoShiftingParameters() {
 	leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / delayBtw2LastData;
 	rightHandVel = (lastReceivedData.handPos[1] - prevReceivedData.handPos[1]) / delayBtw2LastData;
 	headVel = (lastReceivedData.headPos - prevReceivedData.headPos) / delayBtw2LastData;
-	punchVel = (lastReceivedData.punchDepth - prevReceivedData.punchDepth) / delayBtw2LastData;
+	leftHandDepthVel = (lastReceivedData.handDepth[0] - prevReceivedData.handDepth[0]) / delayBtw2LastData;
+	rightHandDepthVel = (lastReceivedData.handDepth[1] - prevReceivedData.handDepth[1]) / delayBtw2LastData;
 
 	autoShiftingTimer.start();
 }
@@ -52,9 +55,12 @@ void Player::updatePosAutoShifting(float handWidth, float headWidth) {
 	headPos += headVel * autoShiftingTimer.getTime();
 	LOWER_BOUND(headPos, headWidth / 2);
 	UPPER_BOUND(headPos, 100 - headWidth / 2);
-	punchDepth += punchVel * autoShiftingTimer.getTime();
-	LOWER_BOUND(punchDepth, 0);
-	UPPER_BOUND(punchDepth, 100);
+	leftHandDepth += leftHandDepthVel * autoShiftingTimer.getTime();
+	LOWER_BOUND(leftHandDepth, 0);
+	UPPER_BOUND(leftHandDepth, 100);
+	rightHandDepth += rightHandDepthVel * autoShiftingTimer.getTime();
+	LOWER_BOUND(leftHandDepth, 0);
+	UPPER_BOUND(leftHandDepth, 100);
 }
 
 void Player::displayPos() {

@@ -1,6 +1,7 @@
 #pragma once
-class Gameplay {
-private : 
-public :
-};
+
+#include "Player.hpp"
+
+void gameplay(Player& player1, Player& player2);
+
 
