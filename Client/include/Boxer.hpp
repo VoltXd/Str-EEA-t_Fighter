@@ -25,8 +25,8 @@ class Boxer
     virtual void initialise(SDL_Texture* headTexture, SDL_Texture* handTexture) = 0;
 
     // Update methods
-    BoxerLivingStatus takeDamage(float rawDamage);
-    bool nextAction(BoxerActionStatus action);
+    BoxerLivingStatus getPunched(float punchPosition);
+    bool nextAction(BoxerActionStatus action, double dt);
 
     inline float getHealthPoints() const { return m_healthPoints; }
     inline float getStamina() const { return m_stamina; }
@@ -38,6 +38,8 @@ class Boxer
     inline float getRightHandPosition() const { return m_xRightHand; }
     inline float getLeftHandPosition() const { return m_xLeftHand; }
     inline float getHeadPosition() const { return m_xHead; }
+
+    inline float getPunchPosition() const { return m_punchPosition; }
 
     // Render method
     virtual void render(SDL_Renderer* renderer) = 0;
@@ -54,6 +56,8 @@ class Boxer
     SDL_Rect m_rightHandRect;
     SDL_Rect m_leftHandRect;
 
+    SDL_Rect m_punchRect;
+
     float m_healthPoints;
     float m_stamina;
     bool m_isPunching;
@@ -64,8 +68,18 @@ class Boxer
 
     BoxerActionStatus m_currentActionStatus;
 
+    float m_punchPosition;
     std::chrono::high_resolution_clock::time_point m_punchTimePoint;
+    int m_elapsedTimeToPunch;
 
-    static const int START_HP = 100;
-    static const int STAMINA_MAX = 100;
+    static constexpr int START_HP = 100;
+    static constexpr int STAMINA_MAX = 100;
+    static constexpr int PUNCH_DELAY_MS = 500; 
+    static constexpr int PUNCH_WIDTH = 10;
+    static constexpr float HEALTH_REGENERATION_PER_SECOND = 1;
+    static constexpr float STAMINA_REGENERATION_PER_SECOND = 3;
+
+    static constexpr int STAMINA_COST_PUNCH = 10;
+    static constexpr int STAMINA_COST_PUNCHED_WHILE_GUARDING = 20;
+    static constexpr int STAMINA_COST_GUARD_PER_SECOND = 5;
 };

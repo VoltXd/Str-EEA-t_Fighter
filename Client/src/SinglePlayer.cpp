@@ -10,6 +10,8 @@
 static float tempXHead = 50;
 static bool isLeftMoving = false;
 static bool isRightMoving = false;
+static bool isPlayerStartingPunchingLeft = false;
+static bool isPlayerStartingPunchingRight = false;
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
 {
@@ -21,6 +23,8 @@ SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
     m_backgroundTexture = nullptr;
     m_playerHeadTexture = nullptr;
     m_playerHandTexture = nullptr;
+
+    m_previousTimePoint = std::chrono::high_resolution_clock::now();
 }
 
 SceneId SinglePlayer::run()
@@ -88,10 +92,18 @@ void SinglePlayer::input()
 				break;
 
             case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                if (event.key.keysym.sym == SDLK_ESCAPE)
                 {
                     m_isRunning = false;
                     m_nextScene = SceneId::MainMenu;
+                }
+                else if (event.key.keysym.sym == SDLK_q)
+                {
+                    isPlayerStartingPunchingLeft = true;
+                }
+                else if (event.key.keysym.sym == SDLK_d)
+                {
+                    isPlayerStartingPunchingRight = true;
                 }
                 break;
 
@@ -121,13 +133,49 @@ void SinglePlayer::input()
 
 void SinglePlayer::update()
 {
+    // Current player controls (Mouse and clicks)
     m_player.setHeadPosition(tempXHead);
     if (isLeftMoving)
         m_player.setLeftHandPosition(tempXHead);
     if (isRightMoving)
         m_player.setRightHandPosition(tempXHead);
 
+    // Aim bot
     m_bot.calculateNextAction(m_player);
+
+    // Setting next player action
+    BoxerActionStatus playerAction;
+    if (isPlayerStartingPunchingLeft)
+    {
+        playerAction = BoxerActionStatus::PunchingLeft;
+        isPlayerStartingPunchingLeft = false;
+    }
+    else if (isPlayerStartingPunchingRight)
+    {
+        playerAction = BoxerActionStatus::PunchingRight;
+        isPlayerStartingPunchingRight = false;
+    }
+    else 
+    {
+        playerAction = BoxerActionStatus::Idle;
+    }
+
+    // Getting delta time
+    std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+    double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(now - m_previousTimePoint).count() * 1e-9;
+    
+    // Executing player & bot next action
+    bool isPlayerPunchingNow = m_player.nextAction(playerAction, dt);
+    bool isBotPunchingNow = m_bot.nextAction(BoxerActionStatus::PunchingLeft, dt);
+    
+    // Checking for player punch on this frame
+    if (isPlayerPunchingNow)
+        checkPunch(m_player, m_bot);
+    
+    if (isBotPunchingNow)
+        checkPunch(m_bot, m_player);
+
+    m_previousTimePoint = now;
 }
 
 void SinglePlayer::render()
@@ -141,4 +189,14 @@ void SinglePlayer::render()
     m_bot.render(m_renderer);
 
     SDL_RenderPresent(m_renderer);
+}
+
+void SinglePlayer::checkPunch(Boxer& attacker, Boxer& target)
+{
+    BoxerLivingStatus targetLivingStatus = target.getPunched(attacker.getPunchPosition());
+    if (targetLivingStatus == BoxerLivingStatus::Dead)
+    {
+        m_isRunning = false;
+        m_nextScene = SceneId::MainMenu;
+    }   
 }

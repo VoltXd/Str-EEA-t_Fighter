@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <chrono>
+
 #include "Scene.hpp"
 #include "Player.hpp"
 #include "Bot.hpp"
@@ -18,9 +20,13 @@ class SinglePlayer : public Scene
     void update() override;
     void render() override;
     
+    void checkPunch(Boxer& attacker, Boxer& target);
+
     SDL_Texture* m_backgroundTexture;
     SDL_Texture* m_playerHeadTexture;
     SDL_Texture* m_playerHandTexture;
+
+    std::chrono::high_resolution_clock::time_point m_previousTimePoint;
     
     Player m_player;
     Bot m_bot;

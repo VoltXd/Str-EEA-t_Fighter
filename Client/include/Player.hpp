@@ -16,4 +16,6 @@ class Player : public Boxer
     private:
     SDL_Rect m_healthBar;
     SDL_Rect m_healthBarBorder;
+    SDL_Rect m_staminaBar;
+    SDL_Rect m_staminaBarBorder;
 };

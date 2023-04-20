@@ -9,6 +9,7 @@ Bot::Bot()
     m_headRect = { 0, 0, 0, 0 };
     m_rightHandRect = { 0, 0, 0, 0 };
     m_leftHandRect = { 0, 0, 0, 0 };
+    m_punchRect = { 0, 0, 0, 0 };
     
     m_healthPoints = START_HP;
     m_stamina = STAMINA_MAX;
@@ -52,6 +53,10 @@ void Bot::initialise(SDL_Texture *headTexture, SDL_Texture *handTexture)
     m_leftHandRect.h = m_rightHandRect.h;
     m_leftHandRect.x = m_xLeftHand * 0.01 * settings.screenWidth - m_leftHandRect.w / 2;
     m_leftHandRect.y = settings.screenHeight * HEIGHT_RATIO - m_leftHandRect.h / 2;
+
+    // Set punch rectangle
+    m_punchRect.h = settings.screenHeight;
+    m_punchRect.w = settings.screenWidth * PUNCH_WIDTH / 100;
 }
 
 void Bot::calculateNextAction(const Player& player)
@@ -62,6 +67,15 @@ void Bot::calculateNextAction(const Player& player)
 
 void Bot::render(SDL_Renderer* renderer)
 {
+    // Render punching area
+    if (m_isPunching)
+    {
+        int punchRectAlpha = m_elapsedTimeToPunch * 255 / PUNCH_DELAY_MS;
+        SDL_SetRenderDrawColor(renderer, 0, 128, 128, punchRectAlpha);
+        SDL_RenderFillRect(renderer, &m_punchRect);
+    }
+
+    // Render bot's head & hands
     SDL_RenderCopy(renderer, m_headTexture, nullptr, &m_headRect);
     SDL_RenderCopy(renderer, m_handTexture, nullptr, &m_rightHandRect);
     SDL_RenderCopyEx(renderer, m_handTexture, nullptr, &m_leftHandRect, 0, nullptr, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);

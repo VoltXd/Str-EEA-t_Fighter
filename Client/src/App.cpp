@@ -20,7 +20,6 @@ App::App()
 	settings.screenWidth = 1280;
 	settings.screenHeight = 720;
 	settings.isFullscreenOn = false;
-
 }
 
 int App::run()
