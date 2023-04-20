@@ -7,6 +7,7 @@
 #include "Toolbox.hpp"
 #include "MainMenu.hpp"
 #include "SinglePlayer.hpp"
+#include "MultiPlayerMenu.hpp"
 #include "Settings.hpp"
 
 App::App()
@@ -43,6 +44,13 @@ int App::run()
 			{
 				SinglePlayer singlePlayer(m_renderer);
 				currentScene = singlePlayer.run();
+				break;
+			}
+
+			case SceneId::MultiPlayerMenu:
+			{
+				MultiPlayerMenu multiPlayerMenu(m_renderer);
+				currentScene = multiPlayerMenu.run();
 				break;
 			}
 			

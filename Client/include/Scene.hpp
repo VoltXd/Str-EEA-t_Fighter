@@ -7,6 +7,7 @@ enum class SceneId
     Intro,
     MainMenu,
     SinglePlayer,
+    MultiPlayerMenu,
     MultiPlayer,
     Quit
 };

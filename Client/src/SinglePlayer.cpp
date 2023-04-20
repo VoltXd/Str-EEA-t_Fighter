@@ -14,6 +14,8 @@ static bool isPlayerStartingPunchingLeft = false;
 static bool isPlayerStartingPunchingRight = false;
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
+    : m_player(Player()),
+      m_bot(Bot())
 {
     m_renderer = renderer;
 

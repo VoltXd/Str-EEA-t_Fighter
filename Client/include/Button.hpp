@@ -24,5 +24,5 @@ class Button
     int m_height;
     int m_textWidth;
     int m_textHeight;
-    bool m_isSelected;
+    bool m_isFocused;
 };

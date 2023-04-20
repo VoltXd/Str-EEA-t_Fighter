@@ -21,7 +21,7 @@ Button::Button()
     m_textWidth = 0;
     m_textHeight = 0;
 
-    m_isSelected = false;
+    m_isFocused = false;
 }
 
 Button::~Button()
@@ -83,7 +83,7 @@ bool Button::update(SDL_Point mousePosition, bool isUserClicking)
     bool isClicked = false;
     if (SDL_HasIntersection(&m_buttonDstRect, &mousePositionRect))
     {
-        if (m_isSelected == false)
+        if (m_isFocused == false)
         {
             // The button is being selected, make it bigger
             m_buttonDstRect.w = m_width * SCALE_FACTOR;
@@ -95,7 +95,7 @@ bool Button::update(SDL_Point mousePosition, bool isUserClicking)
             m_textDstRect.h = m_textHeight * SCALE_FACTOR;
             m_textDstRect.x = m_x - (m_textDstRect.w / 2);
             m_textDstRect.y = m_y - (m_textDstRect.h / 2);
-            m_isSelected = true;
+            m_isFocused = true;
         }
 
         if (isUserClicking)
@@ -103,7 +103,7 @@ bool Button::update(SDL_Point mousePosition, bool isUserClicking)
     }
     else
     {
-        if (m_isSelected == true)
+        if (m_isFocused == true)
         {
             // The button is being unselected, make it normal size
             m_buttonDstRect.w = m_width;
@@ -115,7 +115,7 @@ bool Button::update(SDL_Point mousePosition, bool isUserClicking)
             m_textDstRect.h = m_textHeight;
             m_textDstRect.x = m_x - (m_textDstRect.w / 2);
             m_textDstRect.y = m_y - (m_textDstRect.h / 2);
-            m_isSelected = false;
+            m_isFocused = false;
         }
     }
 

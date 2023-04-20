@@ -7,7 +7,10 @@
 #include "Settings.hpp"
 #include "Toolbox.hpp"
 
-MainMenu::MainMenu(SDL_Renderer* renderer)
+MainMenu::MainMenu(SDL_Renderer* renderer) 
+    : m_singlePlayerButton(Button()),
+      m_multiPlayerButton(Button()),
+      m_quitButton(Button())
 {
     m_renderer = renderer;
     m_buttonTexture = nullptr;
@@ -17,10 +20,6 @@ MainMenu::MainMenu(SDL_Renderer* renderer)
     m_isClicking = false;
     
     m_nextScene = SceneId::MainMenu;
-
-    m_singlePlayerButton = Button();
-    m_multiPlayerButton = Button();
-    m_quitButton = Button();
 
     m_isRunning = true;
 }
@@ -156,7 +155,7 @@ void MainMenu::playSingle()
 void MainMenu::playMulti()
 {
     m_isRunning = false;
-    m_nextScene = SceneId::MultiPlayer;
+    m_nextScene = SceneId::MultiPlayerMenu;
 }
 
 void MainMenu::quit()
