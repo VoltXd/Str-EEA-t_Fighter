@@ -5,10 +5,19 @@
 #include "Settings.hpp"
 #include "Toolbox.hpp"
 
-MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer) : m_ipPortBox(IpPortBox())
+MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer) 
+    : m_ipPortBox(),
+      m_inputString() 
 {
     m_renderer = renderer;
     m_nextScene = SceneId::MainMenu;
+
+    m_ipPortBoxFont = nullptr;
+
+    m_mousePosition = { 0, 0 };
+    m_isClicking = false;
+
+    m_isRunning = true;
 }
 
 SceneId MultiPlayerMenu::run()
@@ -23,6 +32,8 @@ SceneId MultiPlayerMenu::run()
         render();
     }
 
+    TTF_CloseFont(m_ipPortBoxFont);
+    SDL_StopTextInput();
     return m_nextScene;
 }
 
@@ -58,7 +69,28 @@ void MultiPlayerMenu::input()
 				m_isRunning = false;
                 m_nextScene = SceneId::Quit;
 				break;
-			
+
+            case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    m_isRunning = false;
+                    m_nextScene = SceneId::MainMenu;
+                }
+                break;
+
+            case SDL_MOUSEMOTION:
+                SDL_GetMouseState(&m_mousePosition.x, &m_mousePosition.y);
+                break;
+
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT)
+                    m_isClicking = true;
+                break;
+
+            case SDL_TEXTINPUT:
+                strncpy(m_inputString, event.text.text, 31);
+                break;
+                
 			default:
 				break;
 		}
@@ -67,7 +99,11 @@ void MultiPlayerMenu::input()
 
 void MultiPlayerMenu::update()
 {
-    m_ipPortBox.update();
+    if (m_ipPortBox.update(m_mousePosition, m_isClicking))
+        m_ipPortBox.updateText(m_renderer, m_inputString);
+
+    m_inputString[0] = '\0';
+    m_isClicking = false;
 }
 
 void MultiPlayerMenu::render()
