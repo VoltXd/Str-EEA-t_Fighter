@@ -40,34 +40,9 @@ int IpPortBox::initialise(SDL_Renderer* renderer, TTF_Font* textFont, int x, int
     // Calculate button destination rectangle
     m_ipRect = { x - (w / 2), y - (h / 2), w, h / 2 };
     m_portRect = { x - (w / 2), y, w, h / 2 };
-
-    // Get text surface
-    constexpr SDL_Color white = { 255, 255, 255 };
-    SDL_Surface* ipSurface = TTF_RenderText_Blended(m_textFont, m_ip.c_str(), white);
-    if (ipSurface == nullptr)
-    {
-        SDL_ShowError("IpBox RenderText error", __FILE__, __LINE__);
-        return EXIT_FAILURE;    
-    }
     
-    // Converse text surface to texture
-    m_ipTextTexture = SDL_CreateTextureFromSurface(renderer, ipSurface);
-    if (m_ipTextTexture == nullptr)
-    {
-        SDL_ShowError("IpBox CreateTextureFromSurface error", __FILE__, __LINE__);
-        return EXIT_FAILURE;    
-    }
-
-    // Free surface
-    SDL_FreeSurface(ipSurface);
-    
-    // Calculate text destination rectangle 
-    const int textScale = 3;
-    int ipWidth, ipHeight;
-    SDL_QueryTexture(m_ipTextTexture, nullptr, nullptr, &ipWidth, &ipHeight);
-    ipWidth *= (float)h / 2 / textScale / ipHeight;
-    ipHeight = (float)h / 2 / textScale;
-    m_ipTextRect = { x - (ipWidth / 2), y - (ipHeight / 2) - (h / 4), ipWidth, ipHeight};
+    updateTexture(renderer, BoxType::IP);
+    updateTexture(renderer, BoxType::Port);
 
     return EXIT_SUCCESS;
 }
@@ -103,26 +78,46 @@ bool IpPortBox::update(SDL_Point mousePosition, bool isUserClicking)
             m_isPortSelected = false;
         }
     }
+
     return m_isIpSelected || m_isPortSelected;
 }
 
 void IpPortBox::render(SDL_Renderer* renderer)
 {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 16, 16, 16, 255);
     SDL_RenderFillRect(renderer, &m_ipRect);
+    SDL_RenderFillRect(renderer, &m_portRect);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &m_ipRect);
+    SDL_RenderDrawRect(renderer, &m_portRect);
     SDL_RenderCopy(renderer, m_ipTextTexture, nullptr, &m_ipTextRect);
+    SDL_RenderCopy(renderer, m_portTextTexture, nullptr, &m_portTextRect);
 }
 
-void IpPortBox::updateText(SDL_Renderer* renderer, const char* appendedString)
+void IpPortBox::updateText(SDL_Renderer* renderer, const char* appendedString, bool isErasing)
 {
     if (m_isFirstInput)
     {
         m_ip.clear();
         m_port = 0;
         m_isFirstInput = false;
+        updateTexture(renderer, BoxType::IP);
+        updateTexture(renderer, BoxType::Port);
+    }
+
+    if (isErasing)
+    {
+        if (m_isIpSelected)
+        {
+            m_ip.clear();
+            updateTexture(renderer, BoxType::IP);
+        }
+        else if (m_isPortSelected)
+        {
+            m_port = 0;
+            updateTexture(renderer, BoxType::Port);
+        }
     }
 
     size_t stringLength = strlen(appendedString);
@@ -166,8 +161,11 @@ void IpPortBox::updateTexture(SDL_Renderer* renderer, BoxType boxType)
     {
         texture = m_ipTextTexture;
         rect = &m_ipTextRect;
-        text = &m_ip;
         yOffset = -m_height / 4;  
+        if (m_ip.empty())
+            text = new std::string(" ");
+        else
+            text = &m_ip;
     }
     else 
     {
@@ -210,6 +208,8 @@ void IpPortBox::updateTexture(SDL_Renderer* renderer, BoxType boxType)
     if (BoxType::IP == boxType)
     {
         m_ipTextTexture = texture;
+        if (m_ip.empty())
+            delete text;
     }
     else
     {

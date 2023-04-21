@@ -5,6 +5,7 @@
 #include <string>
 #include "Scene.hpp"
 #include "IpPortBox.hpp"
+#include "Button.hpp"
 
 class MultiPlayerMenu : public Scene
 {
@@ -20,12 +21,19 @@ class MultiPlayerMenu : public Scene
     void update() override;
     void render() override;
 
-    IpPortBox m_ipPortBox;
+    void connect();
+    void cancel();
 
-    TTF_Font* m_ipPortBoxFont;
+    IpPortBox m_ipPortBox;
+    Button m_connectButton;
+    Button m_cancelButton;
+
+    SDL_Texture* m_buttonTexture;
+    TTF_Font* m_textFont;
     SDL_Point m_mousePosition;
 
     char m_inputString[32];
 
     bool m_isClicking;
+    bool m_isErasing;
 };

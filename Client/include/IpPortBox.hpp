@@ -14,8 +14,10 @@ class IpPortBox
     bool update(SDL_Point mousePosition, bool isUserClicking);
     void render(SDL_Renderer* renderer);
 
-    void updateText(SDL_Renderer* renderer, const char* appendedString);
+    void updateText(SDL_Renderer* renderer, const char* appendedString, bool isErasing);
 
+    inline const std::string& getIp() const { return m_ip; };
+    inline int getPort() const { return m_port; }
 
     private:
     static enum class BoxType
