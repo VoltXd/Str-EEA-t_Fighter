@@ -14,14 +14,18 @@
 #define LOCAL_PLAYER_HEADING 'P'
 #define OPPOSING_PLAYER_HEADING 'O'
 
+#define IS_AT_THE_LEVEL_OF_GUARD (char)0xFF // mains positionnées au niveau de la ligne de garde (au niveau du menton)
+#define IS_NOT_AT_THE_LEVEL_OF_GUARD (char)0x00 
+
 #define INITIAL_LEFTHANDPOS 45
 #define INITIAL_RIGHTHANDPOS 55
 #define INITIAL_HEADPOS 50
 #define INITIAL_HANDDEPTH 0
-#define INITIAL_HANDSTATE 0
+#define INITIAL_HANDSTATE IS_AT_THE_LEVEL_OF_GUARD
 #define INITIAL_LIFEBAR 100
-#define INITIAL_GUARDBAR 100
+#define INITIAL_STAMINABAR 100
 #define INITIAL_AFTERPUNCHDELAY 0
+
 
 // format des données UDP pour la connection client-serveur
 typedef struct ClientToServer_Connection {
@@ -36,7 +40,7 @@ typedef struct ClientToServer_Position {
 	float handPos[2];
 	float headPos;
 	float handDepth[2];
-	char handState; 
+	char handState;
 	char paused = 0; // état du joueur (recalibration régulièrement nécessaire)
 } ClientToServer_Position_TypeDef;
 
@@ -57,8 +61,6 @@ typedef struct ServerToClient_Data {
 	char handState;
 	char paused;
 	float lifeBar;
-	float guardBar;
+	float staminaBar;
 	float afterPunchDelay; // délai de réaction du joueur après le coup reçu
 } ServerToClient_Data_TypeDef;
-
-

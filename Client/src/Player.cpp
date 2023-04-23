@@ -3,7 +3,7 @@
 Player::Player(std::string playerName) {
 	name = playerName;
 	prevReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, {INITIAL_HANDDEPTH, INITIAL_HANDDEPTH},
-		INITIAL_HANDSTATE, 0, INITIAL_LIFEBAR, INITIAL_GUARDBAR, INITIAL_AFTERPUNCHDELAY };
+		INITIAL_HANDSTATE, 0, INITIAL_LIFEBAR, INITIAL_STAMINABAR, INITIAL_AFTERPUNCHDELAY };
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
 	rightHandPos = INITIAL_RIGHTHANDPOS;
@@ -13,7 +13,7 @@ Player::Player(std::string playerName) {
 	handState = INITIAL_HANDSTATE;
 	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
-	guardBar = INITIAL_GUARDBAR;
+	staminaBar = INITIAL_STAMINABAR;
 	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
 
 	autoShiftingTimer.start();
@@ -28,7 +28,7 @@ void Player::pullLastReceivedData() {
 	handState = lastReceivedData.handState;
 	paused = lastReceivedData.paused;
 	lifeBar = lastReceivedData.lifeBar;
-	guardBar = lastReceivedData.guardBar;
+	staminaBar = lastReceivedData.staminaBar;
 	afterPunchDelay = lastReceivedData.afterPunchDelay;
 }
 

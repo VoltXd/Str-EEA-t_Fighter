@@ -31,7 +31,7 @@ private:
 	char paused;
 
 	float lifeBar;
-	float guardBar;
+	float staminaBar;
 
 	float afterPunchDelay;
 
@@ -57,7 +57,7 @@ public:
 	float getLeftHandDepth() { return leftHandDepth; };
 	float getRightHandDepth() { return rightHandDepth; };
 	float getLifeBar() { return lifeBar; };
-	float getGuardBar() { return guardBar; };
+	float getStaminaBar() { return staminaBar; };
 
 	void dataAreReceived() { comTimer.start(); }; // remise à zéro du timer
 	unsigned long long checkTime() { return comTimer.getTime(); };

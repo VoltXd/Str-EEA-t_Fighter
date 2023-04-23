@@ -77,6 +77,7 @@ int main()  {
         player[1].sendStartDatagram(serverSocket, player[0].getName());
         
         std::cout << "Players are ready - Game start" << std::endl;
+        Gameplay gameplay(&player[0], &player[1]);
         isStarted = true;
         /* --- */
 
@@ -109,6 +110,7 @@ int main()  {
             
             /* --- Gameplay --- */
             //std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            gameplay.process_data();
             /* --- */
 
             /* --- Envoi des données mise à jour aux joueurs --- */

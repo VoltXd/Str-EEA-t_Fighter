@@ -25,7 +25,7 @@ private :
 	char handState;
 	char paused;
 	float lifeBar;
-	float guardBar;
+	float staminaBar;
 	float afterPunchDelay;
 
 	unsigned long long dateOfLastPullData;
@@ -39,7 +39,7 @@ public :
 	void setAddr(SOCKADDR_IN addr) { this->addr = addr; };
 	void setLastReceivedData(ClientToServer_Position_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
 	void setLifeBar(float lifeBar) { this->lifeBar = lifeBar; };
-	void setGuardBar(float guardBar) { this->guardBar = guardBar; };
+	void setStaminaBar(float staminaBar) { this->staminaBar = staminaBar; };
 	std::string getName() { return name; };
 	SOCKADDR_IN& getAddr() { return addr; };
 	float getLeftHandPos() { return leftHandPos; };
@@ -50,7 +50,7 @@ public :
 	float getLeftHandDepth() { return leftHandDepth; };
 	float getRightHandDepth() { return rightHandDepth; };
 	float getLifeBar() { return lifeBar; };
-	float getGuardBar() { return guardBar; };
+	float getStaminaBar() { return staminaBar; };
 	float getAfterPunchDelay() { return afterPunchDelay; };
 
 	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer

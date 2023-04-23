@@ -14,7 +14,7 @@ Player::Player() {
 	handState = INITIAL_HANDSTATE;
 	paused = 0;
 	lifeBar = INITIAL_LIFEBAR;
-	guardBar = INITIAL_GUARDBAR;
+	staminaBar = INITIAL_STAMINABAR;
 	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
 
 	dateOfLastPullData = ~0; // temps très grand tant qu'on a pas reçu la première trame de données
@@ -50,7 +50,7 @@ void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
 	playerData.handState = getHandState();
 	playerData.paused = getPaused();
 	playerData.lifeBar = getLifeBar();
-	playerData.guardBar = getGuardBar();
+	playerData.staminaBar = getStaminaBar();
 	playerData.afterPunchDelay = getAfterPunchDelay();
 
 	// envoi au joueur lui-même
