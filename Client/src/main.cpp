@@ -2,9 +2,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
-#include "headCalibration.h"
-#include "headCorrelationTracking.h"
-#include "handTracking.h"
+#include "headCalibration.hpp"
+#include "headCorrelationTracking.hpp"
+#include "handTracking.hpp"
 #include <chrono>
 
 #define THRESHOLD_RATIO 0.1
@@ -15,9 +15,10 @@ int main()
 	cv::Mat gCroppedHead, gScreenshot, gFrame;
 	cv::Mat rgbFrame, rgbScreenshotCalibration;
 	cv::Vec3f handRgbCalibration;
+	std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 	bool firstCalibration = true;
 	bool duringCalibration = false;
-	bool endCalibrationTimer  = false;
+	bool endCalibrationTimer = false;
 	float rThreshold = 0., gThreshold = 0., bThreshold = 0.;
 	// Open the defautl camera
 	cv::VideoCapture cap(0);
@@ -29,11 +30,11 @@ int main()
 	int handSquareSize = ellipseSize.width * 3 / 2;
 
 	// Hand calibration data
-	cv::Point topLeftLhandCorner(imageCenter.x - 2 * ellipseSize.width, 0); // imageCenter.y + ellipseSize.height * 3 / 2);
-	cv::Point bottomRightLhandCorner(imageCenter.x - 2 * ellipseSize.width + handSquareSize, handSquareSize); // imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
+	cv::Point topLeftLhandCorner(imageCenter.x - 2 * ellipseSize.width, imageCenter.y + ellipseSize.height * 3 / 2);
+	cv::Point bottomRightLhandCorner(imageCenter.x - 2 * ellipseSize.width + handSquareSize, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
 	cv::Point leftHandCenter((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
-	cv::Point topLeftRhandCorner(imageCenter.x + 2 * ellipseSize.width - handSquareSize, 0); // imageCenter.y + ellipseSize.height * 3 / 2);
-	cv::Point bottomRightRhandCorner(imageCenter.x + 2 * ellipseSize.width, handSquareSize); // imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
+	cv::Point topLeftRhandCorner(imageCenter.x + 2 * ellipseSize.width - handSquareSize, imageCenter.y + ellipseSize.height * 3 / 2);
+	cv::Point bottomRightRhandCorner(imageCenter.x + 2 * ellipseSize.width, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
 	cv::Point rightHandCenter((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
 
 	cv::Point oldLHCenter, oldRHCenter;
@@ -64,12 +65,13 @@ int main()
 
 		// Calibration starts when pressing the ENTER key
 		if (cv::waitKey(10) == 13) {
-			auto start = std::chrono::high_resolution_clock::now();
-			auto end = start;
+			start = std::chrono::high_resolution_clock::now();
+			end = start;
 			duringCalibration = true;
 			endCalibrationTimer = false;
+		}
 
-			// 5 seconds are given to strike a pose
+		// 5 seconds are given to strike a pose
 		if (duringCalibration && std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < 5) {
 			end = std::chrono::high_resolution_clock::now();
 			cap >> frame;
@@ -88,7 +90,7 @@ int main()
 			endCalibrationTimer = true;
 		}
 
-		if (duringCalibration && endCalibrationTimer){
+		if (duringCalibration && endCalibrationTimer) {
 			duringCalibration = false;
 			// Saving the current frame for processing purpose
 			screenshotCalibration = frame.clone();
@@ -133,14 +135,14 @@ int main()
 		}
 
 		// Display the video frame with the callibration ellipse and the head center
-		if (croppedHead.empty())
+		if (croppedHead.empty()) {
 			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
-		cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
-		cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
+			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
+			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
+		}
 		cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
 		cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
 		cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-
 		cv::imshow("Flux vidéo de la caméra", frame);
 
 		// Waitkey for image rendering purpose

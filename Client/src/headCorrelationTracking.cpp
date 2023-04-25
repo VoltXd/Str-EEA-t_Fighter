@@ -1,7 +1,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "headCorrelationTracking.h"
+#include "headCorrelationTracking.hpp"
 
 cv::Point headTracking(cv::Mat& croppedHead, cv::Mat& currentImage, cv::Mat& screenshot, cv::Point headCenter, cv::Size ellipseSize) {
 
