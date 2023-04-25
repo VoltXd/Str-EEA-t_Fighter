@@ -10,6 +10,7 @@
 #include <WinSock2.h> 
 
 #include "Data_structs.hpp"
+#include "Vec2D.hpp"
 #include "Timer.hpp"
 
 #define LOWER_BOUND(value, limit) (value < limit) ? value = limit : value = value 
@@ -23,24 +24,15 @@ private:
 	Timer<std::chrono::milliseconds> comTimer; // timer pour la gestion de la communication par rapport au temps
 	Timer<std::chrono::microseconds> autoShiftingTimer; // timer pour la gestion du déplacement automatique
 
-	float leftHandPos, rightHandPos;
-	float headPos;
-	float leftHandDepth;
-	float rightHandDepth;
-	char handState;
+	Vec2D leftHandPos, rightHandPos;
+	Vec2D headPos;
 	char paused;
-
 	float lifeBar;
 	float staminaBar;
 
-	float afterPunchDelay;
-
 	// vitesses pour le déplacement automatique
-	float leftHandVel;
-	float rightHandVel;
-	float headVel;
-	float leftHandDepthVel;
-	float rightHandDepthVel;
+	Vec2D leftHandVel, rightHandVel;
+	Vec2D headVel;
 
 public:
 	Player(std::string playerName);
@@ -51,11 +43,10 @@ public:
 	ServerToClient_Data_TypeDef& getLastReceivedData() { return lastReceivedData; };
 	ServerToClient_Data_TypeDef& getPrevReceivedData() { return prevReceivedData; };
 	std::string getName() { return name; };
-	float getLeftHandPos() { return leftHandPos; };
-	float getRightHandPos() { return rightHandPos; };
-	float getHeadPos() { return headPos; };
-	float getLeftHandDepth() { return leftHandDepth; };
-	float getRightHandDepth() { return rightHandDepth; };
+	Vec2D& getLeftHandPos() { return leftHandPos; };
+	Vec2D& getRightHandPos() { return rightHandPos; };
+	Vec2D& getHeadPos() { return headPos; };
+	char isPaused() { return paused; };
 	float getLifeBar() { return lifeBar; };
 	float getStaminaBar() { return staminaBar; };
 
@@ -64,7 +55,5 @@ public:
 
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
 	void setAutoShiftingParameters(); // met à jour les paramètres du déplacement automatique
-	void updatePosAutoShifting(float handWidth, float headWidth);
-
-	void displayPos();
+	void updatePosAutoShifting(float headWidth, float headHeight, float handWidth, float handHeight);
 };

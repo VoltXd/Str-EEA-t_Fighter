@@ -92,9 +92,11 @@ int main(int argc, char** argv) {
             }
 
             player->pullLastReceivedData();
-            player->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
+            player->updatePosAutoShifting((float)HEAD_WIDTH / SCREEN_WIDTH, (float)HEAD_HEIGHT / SCREEN_HEIGHT, 
+                (float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_HEIGHT / SCREEN_HEIGHT);
             opponent->pullLastReceivedData();
-            opponent->updatePosAutoShifting((float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_WIDTH / SCREEN_HEIGHT);
+            opponent->updatePosAutoShifting((float)HEAD_WIDTH / SCREEN_WIDTH, (float)HEAD_HEIGHT / SCREEN_HEIGHT,
+                (float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_HEIGHT / SCREEN_HEIGHT);
 
             recvDataSyncMutex.unlock();
             /* --- */
@@ -102,9 +104,9 @@ int main(int argc, char** argv) {
             /* --- Affichage graphique des joueurs --- */
             if (app->exit()) isStarted = false;
             app->renderClear();
-            app->drawRect(player->getLeftHandPos(), 50, HAND_WIDTH, {255,255,255,255});
-            app->drawRect(player->getRightHandPos(), 50, HAND_WIDTH, { 255,255,255,255 });
-            app->drawRect(player->getHeadPos(), 30, HAND_WIDTH, { 0,0,255,255 });
+            app->drawRect(player->getLeftHandPos().x, player->getLeftHandPos().y, HAND_WIDTH, {255,255,255,255});
+            app->drawRect(player->getRightHandPos().x, player->getRightHandPos().y, HAND_WIDTH, { 255,255,255,255 });
+            app->drawRect(player->getHeadPos().x, player->getHeadPos().y, HAND_WIDTH, { 255,255,255,255 });
             app->renderPresent();
             /* --- */
         }
@@ -139,8 +141,8 @@ int main(int argc, char** argv) {
 void getAndSendPos() {
     // Trame de position pour l'envoi au serveur
     ClientToServer_Position_TypeDef posDataToSend;
-    posDataToSend.handPos[0] = 0, posDataToSend.handPos[1] = 100, posDataToSend.headPos = 0;
-    posDataToSend.handDepth[0] = 0; posDataToSend.handDepth[1] = 0; posDataToSend.handState = 0; posDataToSend.paused = 0;
+    posDataToSend.handPos[0] = Vec2D(45, 50), posDataToSend.handPos[1] = Vec2D(55, 50), posDataToSend.headPos = Vec2D(50, 40);
+    posDataToSend.paused = INITIAL_GAMESTATE;
 
     /* --- OpenCV objects --- */
     cv::Mat frame, croppedHead, screenshotCalibration;
@@ -172,9 +174,9 @@ void getAndSendPos() {
 
     //float direction = 1;
     while (!stop_flag_getAndSendPosThread.load()) {
-        /*std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
-        posDataToSend.handPos[0] += direction * 0.05; posDataToSend.handPos[1] -= direction * 0.05;
+        /*posDataToSend.handPos[0] += Vec2D(direction * 0.05, direction * 0.05); posDataToSend.handPos[1] -= Vec2D(direction * 0.05, direction * 0.05);
         if ((posDataToSend.handPos[0] >= 100) || (posDataToSend.handPos[0] <= 0) || (posDataToSend.handPos[1] >= 100) || (posDataToSend.handPos[1] <= 0)) {
             direction = -direction;
         }*/
@@ -246,11 +248,14 @@ void getAndSendPos() {
         /* --- */
 
         /* --- mise en forme des données dans la trame d'envoi --- */
-        posDataToSend.handPos[0] = (float)leftHandCenter.x / frame.cols * 100;
-        posDataToSend.handPos[1] = (float)rightHandCenter.x / frame.cols * 100;
-        posDataToSend.headPos = (float)headCenter.x / frame.cols * 100;
-        posDataToSend.handState = 0;
-        posDataToSend.paused = 0;
+        posDataToSend.handPos[0].x = (float)leftHandCenter.x / frame.cols * 100;
+        posDataToSend.handPos[0].y = (float)leftHandCenter.y / frame.rows * 100;
+        posDataToSend.handPos[1].x = (float)rightHandCenter.x / frame.cols * 100;
+        posDataToSend.handPos[1].y = (float)rightHandCenter.y / frame.rows * 100;
+
+        posDataToSend.headPos.x = (float)headCenter.x / frame.cols * 100;
+        posDataToSend.headPos.y = (float)headCenter.y / frame.cols * 100;
+        posDataToSend.paused = IS_STARTED;
         /* --- */
 
         posDataToSend.date = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();

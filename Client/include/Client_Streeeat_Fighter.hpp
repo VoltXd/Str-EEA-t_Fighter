@@ -26,7 +26,10 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
-#define HAND_WIDTH 50
+#define HAND_WIDTH 20
+#define HAND_HEIGHT 20
+#define HEAD_WIDTH 40
+#define HEAD_HEIGHT 60
 
 #define TIMEOUT_VALUE 4000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
 
