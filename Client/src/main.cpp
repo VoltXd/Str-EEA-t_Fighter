@@ -16,6 +16,8 @@ int main()
 	cv::Mat rgbFrame, rgbScreenshotCalibration;
 	cv::Vec3f handRgbCalibration;
 	bool firstCalibration = true;
+	bool duringCalibration = false;
+	bool endCalibrationTimer  = false;
 	float rThreshold = 0., gThreshold = 0., bThreshold = 0.;
 	// Open the defautl camera
 	cv::VideoCapture cap(0);
@@ -64,22 +66,30 @@ int main()
 		if (cv::waitKey(10) == 13) {
 			auto start = std::chrono::high_resolution_clock::now();
 			auto end = start;
+			duringCalibration = true;
+			endCalibrationTimer = false;
 
 			// 5 seconds are given to strike a pose
-			while (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < 5) {
-				end = std::chrono::high_resolution_clock::now();
-				cap >> frame;
-				cv::flip(frame, frame, 1);
-				cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
-				cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
-				cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
-				cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
-				cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-				cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-				cv::imshow("Flux vidéo de la caméra", frame);
-				cv::waitKey(1);
-			}
+		if (duringCalibration && std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < 5) {
+			end = std::chrono::high_resolution_clock::now();
+			cap >> frame;
+			cv::flip(frame, frame, 1);
+			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
+			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
+			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
+			cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
+			cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
+			cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
+			cv::imshow("Flux vidéo de la caméra", frame);
+			cv::waitKey(1);
+		}
 
+		if (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() >= 5) {
+			endCalibrationTimer = true;
+		}
+
+		if (duringCalibration && endCalibrationTimer){
+			duringCalibration = false;
 			// Saving the current frame for processing purpose
 			screenshotCalibration = frame.clone();
 
