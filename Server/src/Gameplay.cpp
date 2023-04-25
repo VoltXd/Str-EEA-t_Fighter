@@ -2,171 +2,130 @@
 
 Gameplay::Gameplay(Player* player1, Player* player2)
 {
-	punched_P1 = false;
-	punched_P2 = false;
-	isOnGuard_P1 = false;
-	isOnGuard_P2 = false;
-
-	lifeBarTimer_P1.start();
-	lifeBarTimer_P2.start();
-	staminaBarTimer_P1.start();
-	staminaBarTimer_P2.start();
-
 	this->player1 = player1;
 	this->player2 = player2;
 }
 
+inline bool Gameplay::isInRectZone(const Vec2D& point, const Vec2D& rectCenter, float rectW, float rectH) {
+	return ((point.x >= rectCenter.x - rectW / 2) && (point.x <= rectCenter.x + rectW / 2) &&
+		(point.y >= rectCenter.y - rectH / 2) && (point.x <= rectCenter.x + rectH / 2));
+}
+
 void Gameplay::process_data() {
-	if ((!player1->getPaused()) && (!player2->getPaused())) {
-		if (isOnGuard_P1 != ((player1->getHandState() == IS_AT_THE_LEVEL_OF_GUARD) && (player1->getLeftHandDepth() <= PUNCH_DEPTH_INF_LIMIT) && (player1->getRightHandDepth() <= PUNCH_DEPTH_INF_LIMIT))) {
-			staminaBarTimer_P1.start();
+	if ((!player1->isPaused()) && (!player2->isPaused())) {
+		// calcul des différents seuils utiles
+		// seuils pour la prise en compte du coup
+		float punchLimit_P1 = player1->getHeadPos().y - PUNCH_DEPTH_SUP_LIMIT * PUNCH_DEPTH_RANGE;
+		float punchLimit_P2 = player2->getHeadPos().y - PUNCH_DEPTH_SUP_LIMIT * PUNCH_DEPTH_RANGE;
+		// seuils de tolérance pour les coups de chaque côté de la tête 
+		float headPosLeftLimit_P1 = player1->getHeadPos().x - HEAD_POS_TOLERANCE;
+		float headPosRightLimit_P1 = player1->getHeadPos().x + HEAD_POS_TOLERANCE;
+		float headPosLeftLimit_P2 = player2->getHeadPos().x - HEAD_POS_TOLERANCE;
+		float headPosRightLimit_P2 = player2->getHeadPos().x + HEAD_POS_TOLERANCE;
+		// seuils de limite repos/non repos (seuil de garde inférieur)
+		float idleVThreshold_P1 = player1->getHeadPos().y + HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE; 
+		float idleVThreshold_P2 = player2->getHeadPos().y + HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE;
+		// seuils de garde supérieur
+		float supGuardVThreshold_P1 = player1->getHeadPos().y - HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE;
+		float supGuardVThreshold_P2 = player2->getHeadPos().y - HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE;
+
+
+		// calcul de l'état de garde
+		player1->setGuard(isInRectZone(player1->getLeftHandPos(), player1->getHeadPos(), HEAD_WIDTH*HEAD_WIDTH_PROPORTION_GUARD_ZONE, HEAD_HEIGHT*HEAD_HEIGHT_PROPORTION_GUARD_ZONE)
+		&& isInRectZone(player1->getRightHandPos(), player1->getHeadPos(), HEAD_WIDTH * HEAD_WIDTH_PROPORTION_GUARD_ZONE, HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE));
+		player2->setGuard(isInRectZone(player2->getLeftHandPos(), player2->getHeadPos(), HEAD_WIDTH * HEAD_WIDTH_PROPORTION_GUARD_ZONE, HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE)
+			&& isInRectZone(player2->getRightHandPos(), player2->getHeadPos(), HEAD_WIDTH * HEAD_WIDTH_PROPORTION_GUARD_ZONE, HEAD_HEIGHT * HEAD_HEIGHT_PROPORTION_GUARD_ZONE));
+
+		// gestion coup player1 sur player2
+		if (((player1->getLeftHandPos().y <= punchLimit_P1) || (player1->getRightHandPos().y <= punchLimit_P1)) && (!player1->hasPunched())) { // coup donné
+			if (((player1->getLeftHandPos().x >= headPosLeftLimit_P2) && (player1->getLeftHandPos().x <= headPosRightLimit_P2))
+			|| ((player1->getRightHandPos().x >= headPosLeftLimit_P2) && (player1->getRightHandPos().x <= headPosRightLimit_P2))) {
+				if ((!player2->isOnGuard()) && (player1->getStaminaBar() >= STAMINA_LOSS_PER_PUNCH)) {
+					if (player2->getLifeBar() > HP_LOSS_PER_PUNCH) {
+						player2->setLifeBar(player2->getLifeBar() - HP_LOSS_PER_PUNCH);
+					}
+					else {
+						player2->setLifeBar(0);
+					}
+				}
+			}
+			if (player1->getStaminaBar() >= STAMINA_LOSS_PER_PUNCH) {
+				player1->setStaminaBar(player1->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
+			}
+			player1->setPunch(true);
 		}
-		if (isOnGuard_P2 != ((player2->getHandState() == IS_AT_THE_LEVEL_OF_GUARD) && (player2->getLeftHandDepth() <= PUNCH_DEPTH_INF_LIMIT) && (player2->getRightHandDepth() <= PUNCH_DEPTH_INF_LIMIT))) {
-			staminaBarTimer_P2.start();
+
+		// gestion coup player2 sur player1
+		if (((player2->getLeftHandPos().y <= punchLimit_P2) || (player2->getRightHandPos().y <= punchLimit_P2)) && (!player2->hasPunched())) { // coup donné
+			if (((player2->getLeftHandPos().x >= headPosLeftLimit_P1) && (player2->getLeftHandPos().x <= headPosRightLimit_P1))
+				|| ((player2->getRightHandPos().x >= headPosLeftLimit_P1) && (player2->getRightHandPos().x <= headPosRightLimit_P1))) {
+				if ((!player1->isOnGuard()) && (player2->getStaminaBar() >= STAMINA_LOSS_PER_PUNCH)) {
+					if (player1->getLifeBar() > HP_LOSS_PER_PUNCH) {
+						player1->setLifeBar(player1->getLifeBar() - HP_LOSS_PER_PUNCH);
+					}
+					else {
+						player1->setLifeBar(0);
+					}
+				}
+			}
+			if (player2->getStaminaBar() >= STAMINA_LOSS_PER_PUNCH) {
+				player2->setStaminaBar(player2->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
+			}
+			player2->setPunch(true);
 		}
-		isOnGuard_P1 = (player1->getHandState() == IS_AT_THE_LEVEL_OF_GUARD) && (player1->getLeftHandDepth() <= PUNCH_DEPTH_INF_LIMIT) && (player1->getRightHandDepth() <= PUNCH_DEPTH_INF_LIMIT);
-		isOnGuard_P2 = (player2->getHandState() == IS_AT_THE_LEVEL_OF_GUARD) && (player2->getLeftHandDepth() <= PUNCH_DEPTH_INF_LIMIT) && (player2->getRightHandDepth() <= PUNCH_DEPTH_INF_LIMIT);
 
 		// gestion barre stamina
-		if (isOnGuard_P1) { // perte de stamina continue en garde
-			if (player1->getStaminaBar() > 0) {
-				player1->setStaminaBar(player1->getStaminaBar() - staminaBarTimer_P1.getTime() * STAMINA_LOSS_ON_GUARD_VELOCITY);
-				staminaBarTimer_P1.start();
-			}
-			else {
+		if ((player1->getLeftHandPos().y <= idleVThreshold_P1) || (player1->getRightHandPos().y <= idleVThreshold_P1)) { // perte de stamina continue au dessus du seuil de garde inférieur
+			player1->setStaminaBar(player1->getStaminaBar() - staminaBarTimer_P1.getTime() * STAMINA_LOSS_NOT_IDLE_VELOCITY);
+			if (player1->getStaminaBar() < 0) {
 				player1->setStaminaBar(0);
 			}
+			staminaBarTimer_P1.start();
 		}
 		else { // gain de stamina au repos
-			if (player1->getStaminaBar() < 100) { 
-				player1->setStaminaBar(player1->getStaminaBar() + staminaBarTimer_P1.getTime() * STAMINA_IDLE_GROWTH_VELOCITY);
-				staminaBarTimer_P1.start();
-			}
-			else {
+			player1->setStaminaBar(player1->getStaminaBar() + staminaBarTimer_P1.getTime() * STAMINA_IDLE_GROWTH_VELOCITY);
+			if (player1->getStaminaBar() > 100) {
 				player1->setStaminaBar(100);
 			}
+			staminaBarTimer_P1.start();
 		}
-		if (isOnGuard_P2) { // perte de stamina continue en garde
-			if (player2->getStaminaBar() > 0) {
-				player2->setStaminaBar(player2->getStaminaBar() - staminaBarTimer_P2.getTime() * STAMINA_LOSS_ON_GUARD_VELOCITY);
-				staminaBarTimer_P2.start();
-			}
-			else {
+		if ((player2->getLeftHandPos().y <= idleVThreshold_P2) || (player2->getRightHandPos().y <= idleVThreshold_P2)) { // perte de stamina continue au dessus du seuil de garde inférieur
+			player2->setStaminaBar(player2->getStaminaBar() - staminaBarTimer_P2.getTime() * STAMINA_LOSS_NOT_IDLE_VELOCITY);
+			if (player2->getStaminaBar() < 0) {
 				player2->setStaminaBar(0);
 			}
+			staminaBarTimer_P2.start();
 		}
 		else { // gain de stamina au repos
-			if (player2->getStaminaBar() < 100) {
-				player2->setStaminaBar(player2->getStaminaBar() + staminaBarTimer_P2.getTime() * STAMINA_IDLE_GROWTH_VELOCITY);
-				staminaBarTimer_P2.start();
-			}
-			else {
+			player2->setStaminaBar(player2->getStaminaBar() + staminaBarTimer_P2.getTime() * STAMINA_IDLE_GROWTH_VELOCITY);
+			if (player2->getStaminaBar() > 100) {
 				player2->setStaminaBar(100);
 			}
+			staminaBarTimer_P2.start();
 		}
 
 		// gestion croissance barre de vie des deux joueurs
 		if (player1->getLifeBar() > 0) {
-			if (player1->getLifeBar() < 100) {
-				player1->setLifeBar(player1->getLifeBar() + lifeBarTimer_P1.getTime() * LIFE_BAR_GROWTH_VELOCITY);
-				lifeBarTimer_P1.start();
-			}
-			else {
+			player1->setLifeBar(player1->getLifeBar() + lifeBarTimer_P1.getTime() * LIFE_BAR_GROWTH_VELOCITY);
+			if (player1->getLifeBar() > 100) {
 				player1->setLifeBar(100);
 			}
+			lifeBarTimer_P1.start();
 		}
 		if (player2->getLifeBar() > 0) {
-			if (player2->getLifeBar() < 100) {
-				player2->setLifeBar(player2->getLifeBar() + lifeBarTimer_P2.getTime() * LIFE_BAR_GROWTH_VELOCITY);
-				lifeBarTimer_P2.start();
-			}
-			else {
+			player2->setLifeBar(player2->getLifeBar() + lifeBarTimer_P2.getTime() * LIFE_BAR_GROWTH_VELOCITY);
+			if (player2->getLifeBar() > 100) {
 				player2->setLifeBar(100);
 			}
-		}
-
-		// gestion coup player1 sur player2
-		if ((player1->getLeftHandDepth() >= PUNCH_DEPTH_SUP_LIMIT) && (!punched_P1)) { // coup donné
-			if ((player1->getLeftHandPos() >= player2->getHeadPos() - HEAD_POS_TOLERANCE) && (player1->getLeftHandPos() <= player2->getHeadPos() + HEAD_POS_TOLERANCE)) {
-				if (!isOnGuard_P2) {
-					if (player2->getLifeBar() > HP_LOSS) {
-						player2->setLifeBar(player2->getLifeBar() - HP_LOSS);
-					}
-					else {
-						player2->setLifeBar(0);
-					}
-					lifeBarTimer_P2.start();
-				}
-			}
-			if (player1->getStaminaBar() > STAMINA_LOSS_PER_PUNCH) {
-				player1->setStaminaBar(player1->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
-				staminaBarTimer_P1.start();
-			}
-			punched_P1 = true;
-		}
-		if ((player1->getRightHandDepth() >= PUNCH_DEPTH_SUP_LIMIT) && (!punched_P1)) {
-			if ((player1->getRightHandPos() >= player2->getHeadPos() - HEAD_POS_TOLERANCE) && (player1->getRightHandPos() <= player2->getHeadPos() + HEAD_POS_TOLERANCE)) {
-				if (!isOnGuard_P2) {
-					if (player2->getLifeBar() > HP_LOSS) {
-						player2->setLifeBar(player2->getLifeBar() - HP_LOSS);
-					}
-					else {
-						player2->setLifeBar(0);
-					}
-					lifeBarTimer_P2.start();
-				}
-			}
-			if (player1->getStaminaBar() > STAMINA_LOSS_PER_PUNCH) {
-				player1->setStaminaBar(player1->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
-				staminaBarTimer_P1.start();
-			}
-			punched_P1 = true;
-		}
-
-		// gestion coup player2 sur player1
-		if ((player2->getLeftHandDepth() >= PUNCH_DEPTH_SUP_LIMIT) && (!punched_P2)) { // coup donné
-			if ((player2->getLeftHandPos() >= player1->getHeadPos() - HEAD_POS_TOLERANCE) && (player2->getLeftHandPos() <= player1->getHeadPos() + HEAD_POS_TOLERANCE)) {
-				if (!isOnGuard_P1)	{
-					if (player1->getLifeBar() > HP_LOSS) {
-						player1->setLifeBar(player1->getLifeBar() - HP_LOSS);
-					}
-					else {
-						player1->setLifeBar(0);
-					}
-					lifeBarTimer_P1.start();
-				}
-			}
-			if (player2->getStaminaBar() > STAMINA_LOSS_PER_PUNCH) {
-				player2->setStaminaBar(player2->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
-				staminaBarTimer_P2.start();
-			}
-			punched_P2 = true;
-		}
-		if ((player2->getRightHandDepth() >= PUNCH_DEPTH_SUP_LIMIT) && (!punched_P2)) {
-			if ((player2->getRightHandPos() >= player1->getHeadPos() - HEAD_POS_TOLERANCE) && (player2->getRightHandPos() <= player1->getHeadPos() + HEAD_POS_TOLERANCE)) {
-				if (!isOnGuard_P1) {
-					if (player1->getLifeBar() > HP_LOSS) {
-						player1->setLifeBar(player1->getLifeBar() - HP_LOSS);
-					}
-					else {
-						player1->setLifeBar(0);
-					}
-					lifeBarTimer_P1.start();
-				}
-			}
-			if (player2->getStaminaBar() > STAMINA_LOSS_PER_PUNCH) {
-				player2->setStaminaBar(player2->getStaminaBar() - STAMINA_LOSS_PER_PUNCH);
-				staminaBarTimer_P2.start();
-			}
-			punched_P2 = true;
+			lifeBarTimer_P2.start();
 		}
 
 		// coup à nouveau possible à donner
-		if ((player1->getLeftHandDepth() <= PUNCH_DEPTH_SUP_LIMIT) && (player1->getRightHandDepth() <= PUNCH_DEPTH_SUP_LIMIT)) {
-			punched_P1 = false;
+		if ((player1->getLeftHandPos().y >= supGuardVThreshold_P1) && (player1->getRightHandPos().y >= supGuardVThreshold_P1)) {
+			player1->setPunch(false);
 		}
-		if ((player2->getLeftHandDepth() <= PUNCH_DEPTH_SUP_LIMIT) && (player2->getRightHandDepth() <= PUNCH_DEPTH_SUP_LIMIT)) {
-			punched_P2 = false;
+		if ((player2->getLeftHandPos().y >= supGuardVThreshold_P2) && (player2->getRightHandPos().y >= supGuardVThreshold_P2)) {
+			player2->setPunch(false);
 		}
 	}
 }

@@ -10,6 +10,7 @@
 #include <WinSock2.h> 
 
 #include "Data_structs.hpp"
+#include "Vec2D.hpp"
 #include "Timer.hpp"
 
 class Player {
@@ -19,14 +20,14 @@ private :
 	ClientToServer_Position_TypeDef lastReceivedData; // dernières données correctes reçues
 	Timer<std::chrono::milliseconds> comLossesTimer; // timer pour la gestion de la perte de communication
 
-	float leftHandPos, rightHandPos;
-	float headPos;
-	float leftHandDepth, rightHandDepth;
-	char handState;
+	Vec2D leftHandPos, rightHandPos;
+	Vec2D headPos;
 	char paused;
 	float lifeBar;
 	float staminaBar;
-	float afterPunchDelay;
+
+	bool onGuard;
+	bool punched; // vrai lorsque le coup vient juste d'être donné
 
 	unsigned long long dateOfLastPullData;
 
@@ -40,18 +41,19 @@ public :
 	void setLastReceivedData(ClientToServer_Position_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
 	void setLifeBar(float lifeBar) { this->lifeBar = lifeBar; };
 	void setStaminaBar(float staminaBar) { this->staminaBar = staminaBar; };
+	void setGuard(bool onGuard) { this->onGuard = onGuard; };
+	void setPunch(bool punched) { this->punched = punched; };
+
 	std::string getName() { return name; };
 	SOCKADDR_IN& getAddr() { return addr; };
-	float getLeftHandPos() { return leftHandPos; };
-	float getRightHandPos() { return rightHandPos; };
-	float getHeadPos() { return headPos; };
-	char getHandState() { return handState; };
-	char getPaused() { return paused; };
-	float getLeftHandDepth() { return leftHandDepth; };
-	float getRightHandDepth() { return rightHandDepth; };
+	Vec2D& getLeftHandPos() { return leftHandPos; };
+	Vec2D& getRightHandPos() { return rightHandPos; };
+	Vec2D& getHeadPos() { return headPos; };
+	char isPaused() { return paused; };
 	float getLifeBar() { return lifeBar; };
 	float getStaminaBar() { return staminaBar; };
-	float getAfterPunchDelay() { return afterPunchDelay; };
+	bool isOnGuard() { return onGuard; };
+	bool hasPunched() { return punched; };
 
 	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
 	unsigned long long checkTime() { return comLossesTimer.getTime(); };
@@ -60,6 +62,5 @@ public :
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu
 	void pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr); // envoie les données actuelle de cette instance au joueur associé et à l'adversaire
 
-	void displayPos();
 };
 

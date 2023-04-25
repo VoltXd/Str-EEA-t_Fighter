@@ -3,19 +3,17 @@
 Player::Player() {
 	name = "undefined";
 	addr = { 0 };
-	lastReceivedData = { POSITION_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, 
-		{INITIAL_HANDDEPTH, INITIAL_HANDDEPTH}, INITIAL_HANDSTATE , 0 }; // position initiale
+	lastReceivedData = { POSITION_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_GAMESTATE }; // position initiale
 
 	leftHandPos = INITIAL_LEFTHANDPOS;
 	rightHandPos = INITIAL_RIGHTHANDPOS;
 	headPos = INITIAL_HEADPOS;
-	leftHandDepth = INITIAL_HANDDEPTH;
-	rightHandDepth = INITIAL_HANDDEPTH;
-	handState = INITIAL_HANDSTATE;
-	paused = 0;
+	paused = INITIAL_GAMESTATE;
 	lifeBar = INITIAL_LIFEBAR;
 	staminaBar = INITIAL_STAMINABAR;
-	afterPunchDelay = INITIAL_AFTERPUNCHDELAY;
+
+	onGuard = false;
+	punched = false;
 
 	dateOfLastPullData = ~0; // temps très grand tant qu'on a pas reçu la première trame de données
 }
@@ -31,9 +29,6 @@ void Player::pullLastReceivedData() {
 	leftHandPos = lastReceivedData.handPos[0];
 	rightHandPos = lastReceivedData.handPos[1];
 	headPos = lastReceivedData.headPos;
-	leftHandDepth = lastReceivedData.handDepth[0];
-	rightHandDepth = lastReceivedData.handDepth[1];
-	handState = lastReceivedData.handState;
 	paused = lastReceivedData.paused;
 }
 
@@ -45,13 +40,9 @@ void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
 	playerData.handPos[0] = getLeftHandPos();
 	playerData.handPos[1] = getRightHandPos();
 	playerData.headPos = getHeadPos();
-	playerData.handDepth[0] = getLeftHandDepth();
-	playerData.handDepth[1] = getRightHandDepth();
-	playerData.handState = getHandState();
-	playerData.paused = getPaused();
+	playerData.paused = isPaused();
 	playerData.lifeBar = getLifeBar();
 	playerData.staminaBar = getStaminaBar();
-	playerData.afterPunchDelay = getAfterPunchDelay();
 
 	// envoi au joueur lui-même
 	playerData.heading = LOCAL_PLAYER_HEADING;
@@ -60,8 +51,4 @@ void Player::pushCurrentPlayerData(SOCKET& socket, SOCKADDR_IN opponentAddr) {
 	// envoi au joueur adverse
 	playerData.heading = OPPOSING_PLAYER_HEADING;
 	sendto(socket, (char*)&playerData, sizeof(playerData), 0, (SOCKADDR*)&opponentAddr, sizeof(opponentAddr));
-}
-
-void Player::displayPos() {
-	std::cout << "left : " << leftHandPos << " - right : " << rightHandPos << std::endl;
 }
