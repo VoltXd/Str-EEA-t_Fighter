@@ -246,6 +246,8 @@ void getAndSendPos() {
             rThreshold = handRgbCalibration[2] * (1.0 - THRESHOLD_RATIO);
             gThreshold = handRgbCalibration[1] * (1.0 + THRESHOLD_RATIO);
             bThreshold = handRgbCalibration[0] * (1.0 + THRESHOLD_RATIO);
+            leftHandCenter = cv::Point((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
+            rightHandCenter = cv::Point((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
             cv::equalizeHist(gScreenshot, gScreenshot);
             // Saving the cropped head
             croppedHead = headCalibration(imageCenter, ellipseSize, frame);

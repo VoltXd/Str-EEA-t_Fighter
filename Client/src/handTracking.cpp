@@ -68,7 +68,7 @@ cv::Point handTracking(cv::Point lastHandCenter, int squareSize, cv::Mat& image)
 	cv::Point handCenter = barycenter(researchArea);
 
 	if (handCenter == cv::Point(0, 0) || handCenter.x + topLeftPoint.x <= 0 || handCenter.x + topLeftPoint.x >= image.cols
-		|| handCenter.y + topLeftPoint.y <= 0 || handCenter.y + topLeftPoint.y >= image.rows) {
+		|| handCenter.y + topLeftPoint.y <= 0 || handCenter.y + topLeftPoint.y >= image.rows || handCenter.x <= BORDER_MARGIN || handCenter.y <= BORDER_MARGIN) {
 		return lastHandCenter;
 	}
 	else {
