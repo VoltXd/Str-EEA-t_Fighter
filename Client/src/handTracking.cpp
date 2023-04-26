@@ -4,6 +4,8 @@
 #include <iostream>
 #include "handTracking.hpp"
 
+#define BORDER_MARGIN 2
+
 cv::Mat RGBtorgb(cv::Mat& image) {
 	cv::Mat rgbImage = cv::Mat::zeros(image.size(), CV_32FC3);
 	cv::Vec3b value;
@@ -68,7 +70,8 @@ cv::Point handTracking(cv::Point lastHandCenter, int squareSize, cv::Mat& image)
 	cv::Point handCenter = barycenter(researchArea);
 
 	if (handCenter == cv::Point(0, 0) || handCenter.x + topLeftPoint.x <= 0 || handCenter.x + topLeftPoint.x >= image.cols
-		|| handCenter.y + topLeftPoint.y <= 0 || handCenter.y + topLeftPoint.y >= image.rows) {
+		|| handCenter.y + topLeftPoint.y <= 0 || handCenter.y + topLeftPoint.y >= image.rows || handCenter.y <= BORDER_MARGIN
+		||handCenter.x <= BORDER_MARGIN) {
 		return lastHandCenter;
 	}
 	else {
