@@ -15,13 +15,7 @@
 #include "Timer.hpp"
 
 // partie traitement video
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-
-#include "headCalibration.hpp"
-#include "headCorrelationTracking.hpp"
-#include "handTracking.hpp"
+#include "WebcamManager.hpp"
 
 #define THRESHOLD_RATIO 0.1 // pourcentage des valeurs de rgb de calibration des poings (seuillage)
 

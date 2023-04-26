@@ -128,4 +128,9 @@ void Gameplay::process_data() {
 			player2->setPunch(false);
 		}
 	}
+	else {
+		// pour éviter de donner un coup directement après la sortie de pause
+		player1->setPunch(true);
+		player2->setPunch(true);
+	}
 }

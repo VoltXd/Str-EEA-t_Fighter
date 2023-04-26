@@ -103,16 +103,18 @@ int main(int argc, char** argv) {
 
             /* --- Affichage graphique des joueurs --- */
             if (app->exit()) isStarted = false;
-            app->renderClear();
-            // joueur local
-            app->drawRect(player->getLeftHandPos().x, player->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, {255,255,255,255});
-            app->drawRect(player->getRightHandPos().x, player->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
-            app->drawRect(player->getHeadPos().x, player->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,255,255,255 });
-            // adversaire
-            app->drawRect(opponent->getLeftHandPos().x, opponent->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
-            app->drawRect(opponent->getRightHandPos().x, opponent->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
-            app->drawRect(opponent->getHeadPos().x, opponent->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,0,0,255 });
-            app->renderPresent();
+            if (!player->isPaused() && !opponent->isPaused()) {
+                app->renderClear();
+                // joueur local
+                app->drawRect(player->getLeftHandPos().x, player->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
+                app->drawRect(player->getRightHandPos().x, player->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
+                app->drawRect(player->getHeadPos().x, player->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,255,255,255 });
+                // adversaire
+                app->drawRect(opponent->getLeftHandPos().x, opponent->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
+                app->drawRect(opponent->getRightHandPos().x, opponent->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
+                app->drawRect(opponent->getHeadPos().x, opponent->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,0,0,255 });
+                app->renderPresent();
+            }
             /* --- */
         }
         delete app;
@@ -150,33 +152,8 @@ void getAndSendPos() {
     posDataToSend.paused = INITIAL_GAMESTATE;
 
     /* --- Video processing init --- */
-    cv::Mat frame, croppedHead, screenshotCalibration;
-    cv::Mat gCroppedHead, gScreenshot, gFrame;
-    cv::Mat rgbFrame, rgbScreenshotCalibration;
-    cv::Vec3f handRgbCalibration;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-    bool duringCalibration = false;
-    bool endCalibrationTimer = false;
-    float rThreshold = 0., gThreshold = 0., bThreshold = 0.;
-    // Open the defautl camera
-    cv::VideoCapture cap(0);
-    // Calibration ellipse's variables
-    cv::Point imageCenter = cv::Point(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 2, cap.get(cv::CAP_PROP_FRAME_HEIGHT) / 3);
-    cv::Size ellipseSize = cv::Size(37, 50);
-    cv::Scalar ellipseColor = cv::Scalar(0, 255, 0);
-    cv::Point headCenter = imageCenter;
-    int handSquareSize = ellipseSize.width * 3 / 2;
-
-    // Hand calibration data
-    cv::Point topLeftLhandCorner(imageCenter.x - 2 * ellipseSize.width, imageCenter.y + ellipseSize.height * 3 / 2);
-    cv::Point bottomRightLhandCorner(imageCenter.x - 2 * ellipseSize.width + handSquareSize, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
-    cv::Point leftHandCenter((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
-    cv::Point topLeftRhandCorner(imageCenter.x + 2 * ellipseSize.width - handSquareSize, imageCenter.y + ellipseSize.height * 3 / 2);
-    cv::Point bottomRightRhandCorner(imageCenter.x + 2 * ellipseSize.width, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize);
-    cv::Point rightHandCenter((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
-
-    cv::Point oldLHCenter, oldRHCenter;
-    if (!cap.isOpened())    {
+    WebcamManager cam;
+    if (!cam.isCameraOpened()) {
         std::cout << "Unable to open camera" << std::endl;
     }
     /* --- */
@@ -191,112 +168,29 @@ void getAndSendPos() {
         }*/
 
         /* --- image processing --- */
-        // Get the next camera video frame and pre-processes it
-        cap >> frame;
-        cv::flip(frame, frame, 1);
-
-        // Color space to detect the gloves
-        rgbFrame = RGBtorgb(frame);
-        rgbThreshold(rgbFrame, rThreshold, gThreshold, bThreshold);
-        cv::erode(rgbFrame, rgbFrame, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-        cv::dilate(rgbFrame, rgbFrame, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
-        cv::cvtColor(frame, gFrame, cv::COLOR_BGR2GRAY);
-        cv::equalizeHist(gFrame, gFrame);
-
-        // Check if the frame has been correctly received
-        if (frame.empty())
-            break;
-
         // Calibration starts when pressing the ENTER key
-        if (cv::waitKey(10) == 13) {
-            start = std::chrono::high_resolution_clock::now();
-            end = start;
-            duringCalibration = true;
-            endCalibrationTimer = false;
+        if (cv::waitKey(1) == 13) {
+            cam.startCalibration();
         }
-
-        // 5 seconds are given to strike a pose
-        if (duringCalibration && std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < 5) {
-            end = std::chrono::high_resolution_clock::now();
-            cap >> frame;
-            cv::flip(frame, frame, 1);
-            cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
-            cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
-            cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
-            cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
-            cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-            cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-            cv::imshow("Flux vidéo de la caméra", frame);
-            cv::waitKey(1);
-        }
-
-        if (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() >= 5) {
-            endCalibrationTimer = true;
-        }
-
-        if (duringCalibration && endCalibrationTimer) {
-            duringCalibration = false;
-            // Saving the current frame for processing purpose
-            screenshotCalibration = frame.clone();
-
-            cvtColor(screenshotCalibration, gScreenshot, cv::COLOR_BGR2GRAY);
-            rgbScreenshotCalibration = RGBtorgb(screenshotCalibration);
-            handRgbCalibration = rgbScreenshotCalibration.at<cv::Vec3f>(cv::Point(imageCenter.x - 2 * ellipseSize.width + handSquareSize / 2, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize / 2) - cv::Point(6, 0));          
-            rThreshold = handRgbCalibration[2] * (1.0 - THRESHOLD_RATIO);
-            gThreshold = handRgbCalibration[1] * (1.0 + THRESHOLD_RATIO);
-            bThreshold = handRgbCalibration[0] * (1.0 + THRESHOLD_RATIO);
-            leftHandCenter = cv::Point((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
-            rightHandCenter = cv::Point((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
-            cv::equalizeHist(gScreenshot, gScreenshot);
-            // Saving the cropped head
-            croppedHead = headCalibration(imageCenter, ellipseSize, frame);
-            cv::Rect croppedRegion(imageCenter.x - ellipseSize.width, imageCenter.y - ellipseSize.height, 2 * ellipseSize.width, 2 * ellipseSize.height);
-            // Re-sizing the cropped head as small as possible to make it a convolution kernel
-            croppedHead = croppedHead(croppedRegion);
-            cv::cvtColor(croppedHead, gCroppedHead, cv::COLOR_BGR2GRAY);
-            cv::equalizeHist(gCroppedHead, gCroppedHead);
-        }
-
-        // Tracking the head if the calibration has already been done
-        if (!croppedHead.empty()) {
-            headCenter = headTracking(gCroppedHead, gFrame, gScreenshot, headCenter, ellipseSize);
-            oldLHCenter = leftHandCenter;
-            oldRHCenter = rightHandCenter;
-
-            leftHandCenter = handTracking(leftHandCenter, handSquareSize, rgbFrame);
-            rightHandCenter = handTracking(rightHandCenter, handSquareSize, rgbFrame);
-        }
-
-        // Display the video frame with the callibration ellipse and the head center
-        if (croppedHead.empty()) {
-            cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
-            cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
-            cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
-        }
-        cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
-        cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-        cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-        cv::imshow("Flux vidéo de la caméra", frame);
+        cam.nextAction();
+        cam.CV_render();
         /* --- */
 
         /* --- mise en forme des données dans la trame d'envoi --- */
-        posDataToSend.handPos[0].x = (float)leftHandCenter.x / frame.cols * 100;
-        posDataToSend.handPos[0].y = (float)leftHandCenter.y / frame.rows * 100;
-        posDataToSend.handPos[1].x = (float)rightHandCenter.x / frame.cols * 100;
-        posDataToSend.handPos[1].y = (float)rightHandCenter.y / frame.rows * 100;
+        posDataToSend.handPos[0].x = (float)cam.getLeftHandCenter().x / cam.getFrameWidth() * 100;
+        posDataToSend.handPos[0].y = (float)cam.getLeftHandCenter().y / cam.getFrameHeight() * 100;
+        posDataToSend.handPos[1].x = (float)cam.getRightHandCenter().x / cam.getFrameWidth() * 100;
+        posDataToSend.handPos[1].y = (float)cam.getRightHandCenter().y / cam.getFrameHeight() * 100;
 
-        posDataToSend.headPos.x = (float)headCenter.x / frame.cols * 100;
-        posDataToSend.headPos.y = (float)headCenter.y / frame.cols * 100;
-        posDataToSend.paused = IS_STARTED;
+        posDataToSend.headPos.x = (float)cam.getHeadCenter().x / cam.getFrameWidth() * 100;
+        posDataToSend.headPos.y = (float)cam.getHeadCenter().y / cam.getFrameHeight() * 100;
+        posDataToSend.paused = cam.isInCalibration() ? IS_PAUSED : IS_STARTED;
         /* --- */
 
         posDataToSend.date = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
         sendto(clientSocket, (const char*)&posDataToSend, sizeof(posDataToSend), 0, (const sockaddr*)&serverAddr, serverAddrSize);
     }
-
-    cv::destroyAllWindows();
 }
 
 void recvPlayerData() {
