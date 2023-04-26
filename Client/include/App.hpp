@@ -1,26 +1,21 @@
 #pragma once
 
 #include <SDL.h>
-#include <iostream>
+#include "Scene.hpp"
 
-#include "PlayerOnline.hpp"
+class App
+{
+public:
+	App();
 
-class App	{
+	int run();
+
 private:
+	int initialise();
+
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
-	SDL_Event event;
 	bool m_isRunning;
-	int m_screenWidth;
-	int m_screenHeight;
 
-public:
-	App(int width, int height);
-	~App();
-	int initialise();
-	bool exit();
-	void drawRect(float x1, float x2, int w, int h, SDL_Color color);
-
-	void renderClear();
-	void renderPresent();
+	SceneId currentScene;
 };

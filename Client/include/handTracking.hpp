@@ -6,8 +6,6 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
-#define BORDER_MARGIN 2
-
 cv::Point barycenter(cv::Mat& image);
 cv::Point handTracking(cv::Point lastHandCenter, int squareSize, cv::Mat& image);
 cv::Mat RGBtorgb(cv::Mat& image);

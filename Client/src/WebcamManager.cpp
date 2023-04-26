@@ -1,4 +1,5 @@
 #include "WebcamManager.hpp"
+#include "Settings.hpp"
 
 #include <opencv2/core/types_c.h>
 
@@ -74,6 +75,9 @@ bool WebcamManager::calibrate()
 		// Update
 		if (nextAction() == false)
 			return hasCalibrationSucceed;
+
+		// Render
+		SDL_renderCalibration();
 	}
 	
 	return hasCalibrationSucceed;
