@@ -33,4 +33,6 @@ class SinglePlayer : public Scene
     Player m_player;
     Bot m_bot;
     WebcamManager m_webcamManager;
+
+    bool m_isCameraInfoAvailable;
 };

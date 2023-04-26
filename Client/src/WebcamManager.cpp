@@ -97,7 +97,6 @@ bool WebcamManager::nextAction()
 	// Check if the frame has been correctly received
 	if (frame.empty())
 	{
-		
    	 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERREUR CAMERA", "Camera indisponible", nullptr);
 		return false;
 	}

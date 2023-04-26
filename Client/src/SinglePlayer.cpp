@@ -7,9 +7,6 @@
 #include "Toolbox.hpp"
 
 // Dummy controler
-static float tempXHead = 50;
-static bool isLeftMoving = false;
-static bool isRightMoving = false;
 static bool isPlayerStartingPunchingLeft = false;
 static bool isPlayerStartingPunchingRight = false;
 
@@ -28,6 +25,8 @@ SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
     m_playerHandTexture = nullptr;
 
     m_previousTimePoint = std::chrono::high_resolution_clock::now();
+
+    m_isCameraInfoAvailable = false;
 }
 
 SceneId SinglePlayer::run()
@@ -107,48 +106,23 @@ void SinglePlayer::input()
                     m_isRunning = false;
                     m_nextScene = SceneId::MainMenu;
                 }
-                else if (event.key.keysym.sym == SDLK_q)
-                {
-                    isPlayerStartingPunchingLeft = true;
-                }
-                else if (event.key.keysym.sym == SDLK_d)
-                {
-                    isPlayerStartingPunchingRight = true;
-                }
-                break;
-
-            case SDL_MOUSEMOTION:
-                tempXHead = 100.0f * event.motion.x / settings.screenWidth;
-                break;
-            
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    isLeftMoving = true;
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    isRightMoving = true;
-                break;
-            
-            case SDL_MOUSEBUTTONUP:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    isLeftMoving = false;
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    isRightMoving = false;
                 break;
 			
 			default:
 				break;
 		}
 	}
+
+    // Open cv Head & hands detection Input
+    m_isCameraInfoAvailable = m_webcamManager.nextAction();
 }
 
 void SinglePlayer::update()
 {
-    // Current player controls (Mouse and clicks)
-    m_player.setHeadPosition(tempXHead);
-    if (isLeftMoving)
-        m_player.setLeftHandPosition(tempXHead);
-    if (isRightMoving)
-        m_player.setRightHandPosition(tempXHead);
+    // Player controls
+    m_player.setHeadPosition(m_webcamManager.getHeadX());
+    m_player.setLeftHandPosition(m_webcamManager.getLeftHandX());
+    m_player.setRightHandPosition(m_webcamManager.getRightHandX());
 
     // Aim bot
     m_bot.calculateNextAction(m_player);
