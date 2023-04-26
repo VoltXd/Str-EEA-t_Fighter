@@ -9,7 +9,7 @@
 
 #define THRESHOLD_RATIO 0.1
 
-int main_max()
+int main()
 {
 	cv::Mat frame, croppedHead, screenshotCalibration;
 	cv::Mat gCroppedHead, gScreenshot, gFrame;
@@ -23,9 +23,9 @@ int main_max()
 	// Open the defautl camera
 	cv::VideoCapture cap(0);
 	// Calibration ellipse's variables
-	cv::Point imageCenter = cv::Point(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 2, cap.get(cv::CAP_PROP_FRAME_HEIGHT) / 3);
-	cv::Size ellipseSize = cv::Size(37, 50);
-	cv::Scalar ellipseColor = cv::Scalar(0, 255, 0);
+	const cv::Point imageCenter = cv::Point(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 2, cap.get(cv::CAP_PROP_FRAME_HEIGHT) / 3);
+	const cv::Size ellipseSize = cv::Size(37, 50);
+	const cv::Scalar ellipseColor = cv::Scalar(0, 255, 0);
 	cv::Point headCenter = imageCenter;
 	int handSquareSize = ellipseSize.width * 3 / 2;
 
@@ -74,16 +74,16 @@ int main_max()
 		// 5 seconds are given to strike a pose
 		if (duringCalibration && std::chrono::duration_cast<std::chrono::seconds>(end - start).count() < 5) {
 			end = std::chrono::high_resolution_clock::now();
-			cap >> frame;
-			cv::flip(frame, frame, 1);
-			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
-			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
-			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
-			cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
-			cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-			cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-			cv::imshow("Flux vid�o de la cam�ra", frame);
-			cv::waitKey(1);
+			// cap >> frame;
+			// cv::flip(frame, frame, 1);
+			// cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
+			// cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
+			// cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
+			// cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
+			// cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
+			// cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
+			// cv::imshow("Flux vid�o de la cam�ra", frame);
+			// cv::waitKey(1);
 		}
 
 		if (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() >= 5) {
@@ -135,7 +135,7 @@ int main_max()
 		}
 
 		// Display the video frame with the callibration ellipse and the head center
-		if (croppedHead.empty()) {
+		if (croppedHead.empty() || duringCalibration) {
 			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
 			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
 			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
