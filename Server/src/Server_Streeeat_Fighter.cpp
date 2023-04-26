@@ -156,7 +156,6 @@ void recvPlayerData() {
             if ((nbrBytesReceived == sizeof(receiptBuffer)) && (receiptBuffer.heading == POSITION_HEADING) && (playerFromAddr.count(clientAddr) == 1)) {
                 playerFromAddr[clientAddr]->setLastReceivedData(receiptBuffer);
                 playerFromAddr[clientAddr]->dataAreReceived();
-                std::cout << playerFromAddr[clientAddr]->getName() << std::endl;
             }
         }
 
