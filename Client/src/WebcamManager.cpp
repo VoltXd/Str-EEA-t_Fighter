@@ -1,6 +1,8 @@
 #include "WebcamManager.hpp"
 
-WebcamManager::WebcamManager() 
+#include <opencv2/core/types_c.h>
+
+WebcamManager::WebcamManager(SDL_Renderer* renderer) 
 	: cap(0),
 	  ellipseSize(37, 50),
 	  ellipseColor(0, 255, 0),
@@ -15,9 +17,68 @@ WebcamManager::WebcamManager()
 	rightHandCenter = cv::Point((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
 	duringCalibration = false;
 	endCalibrationTimer = false;
+	firstCalibration = true;
 	rThreshold = 0., gThreshold = 0., bThreshold = 0.;
 
 	headCenter = imageCenter;
+
+	// Texture creation (WARNING : REALLY UNSAFE)
+	// TODO: Make it safer
+	cap >> frame;
+	
+	frameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, frame.cols, frame.rows);
+}
+
+
+WebcamManager::~WebcamManager()
+{
+	SDL_DestroyTexture(frameTexture);
+}
+
+bool WebcamManager::calibrate(SDL_Renderer* renderer)
+{
+	bool hasCalibrationSucceed = false;
+
+	while (firstCalibration)
+	{
+		// Input
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:
+					firstCalibration = false;
+					hasCalibrationSucceed = false;
+					break;
+
+				case SDL_KEYDOWN:
+					if (event.key.keysym.sym == SDLK_ESCAPE)
+					{
+						firstCalibration = false;
+						hasCalibrationSucceed = false;
+					}
+					else if (event.key.keysym.sym == SDLK_RETURN || event.key.keysym.sym == SDLK_KP_ENTER)
+					{
+						startCalibration();
+						hasCalibrationSucceed = true;
+					}
+					break;
+				
+				default:
+					break;
+			}
+		}
+
+		// Update
+		if (nextAction() == false)
+			return hasCalibrationSucceed;
+
+		// Render
+		SDL_renderCalibration(renderer);
+	}
+	
+	return hasCalibrationSucceed;
 }
 
 void WebcamManager::startCalibration()
@@ -28,14 +89,18 @@ void WebcamManager::startCalibration()
 	endCalibrationTimer = false;
 }
 
-void WebcamManager::nextAction()
+bool WebcamManager::nextAction()
 {
 	// Get the next camera video frame and pre-processes it
 	cap >> frame;
 	
 	// Check if the frame has been correctly received
 	if (frame.empty())
-		return;
+	{
+		
+   	 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERREUR CAMERA", "Camera indisponible", nullptr);
+		return false;
+	}
 	
 	cv::flip(frame, frame, 1);
 
@@ -58,6 +123,7 @@ void WebcamManager::nextAction()
 	if (duringCalibration && endCalibrationTimer) 
 	{
 		duringCalibration = false;
+		firstCalibration = false;
 		// Saving the current frame for processing purpose
 		screenshotCalibration = frame.clone();
 
@@ -96,42 +162,25 @@ void WebcamManager::nextAction()
 	cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
 	cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
 	cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
+
+	return true;
 }
 
-void WebcamManager::SDL_renderCalibration()
+void WebcamManager::SDL_renderCalibration(SDL_Renderer* renderer)
 {
-	
+	// Clear
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+
+	// Update texture
+	SDL_UpdateTexture(frameTexture, nullptr, (void*)frame.data, frame.step1());
+	SDL_RenderCopy(renderer, frameTexture, nullptr, nullptr);
+
+	// Render
+	SDL_RenderPresent(renderer);
 }
 
 void WebcamManager::CV_render()
 {
 	cv::imshow("CV_RENDER", frame);
-}
-
-int main()
-{
-	WebcamManager webcamManager;
-
-	if (!webcamManager.isCameraOpened())
-	{
-		std::cout << "Impossible d'ouvrir la cam�ra." << std::endl;
-		return -1;
-	}
-
-	while (true)
-	{
-		if (cv::waitKey(10) == 13) 
-			webcamManager.startCalibration();
-		
-		webcamManager.nextAction();
-		webcamManager.CV_render();
-
-		// Waitkey for image rendering purpose
-		if (cv::waitKey(1) == 27)
-			break;
-	}
-
-	cv::destroyAllWindows();
-
-	return 0;
 }

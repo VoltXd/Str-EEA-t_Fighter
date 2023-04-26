@@ -14,8 +14,9 @@ static bool isPlayerStartingPunchingLeft = false;
 static bool isPlayerStartingPunchingRight = false;
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
-    : m_player(Player()),
-      m_bot(Bot())
+    : m_player(),
+      m_bot(),
+      m_webcamManager(renderer)
 {
     m_renderer = renderer;
 
@@ -33,6 +34,10 @@ SceneId SinglePlayer::run()
 {
     if (initialise() != EXIT_SUCCESS)
         return SceneId::MainMenu;
+
+    // Calibrate before entering the game loop
+    if (!m_webcamManager.calibrate(m_renderer))
+        return SceneId::MainMenu;
     
     while (m_isRunning)
     {
@@ -41,12 +46,15 @@ SceneId SinglePlayer::run()
         render();
     }
 
+    return m_nextScene;
+}
+
+SinglePlayer::~SinglePlayer() 
+{
     // Free textures
     SDL_DestroyTexture(m_backgroundTexture);
     SDL_DestroyTexture(m_playerHeadTexture);
     SDL_DestroyTexture(m_playerHandTexture);
-
-    return m_nextScene;
 }
 
 int SinglePlayer::initialise()

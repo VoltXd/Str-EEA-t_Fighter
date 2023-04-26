@@ -4,15 +4,18 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
+#include <chrono>
+#include <SDL.h>
+
 #include "headCalibration.hpp"
 #include "headCorrelationTracking.hpp"
 #include "handTracking.hpp"
-#include <chrono>
 
 class WebcamManager
 {
     public:
-    WebcamManager();
+    WebcamManager(SDL_Renderer* renderer);
+	~WebcamManager();
 
     inline bool isCameraOpened() const { return cap.isOpened(); };
 
@@ -20,19 +23,25 @@ class WebcamManager
     inline cv::Point getRightHandCenter() const { return rightHandCenter; };
     inline cv::Point getLeftHandCenter() const { return leftHandCenter; };
 
-    void startCalibration();
-    void nextAction();
-    void SDL_renderCalibration();
+    bool calibrate(SDL_Renderer* renderer);
+    bool nextAction();
+    void SDL_renderCalibration(SDL_Renderer* renderer);
     void CV_render();
 
     private:
+    void startCalibration();
+
+    SDL_Texture* frameTexture;
+
     cv::Mat frame, croppedHead, screenshotCalibration;
 	cv::Mat gCroppedHead, gScreenshot, gFrame;
 	cv::Mat rgbFrame, rgbScreenshotCalibration;
 	cv::Vec3f handRgbCalibration;
 	std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+    bool firstCalibration;
 	bool duringCalibration;
 	bool endCalibrationTimer;
+
 	float rThreshold, gThreshold, bThreshold;
     
 	cv::VideoCapture cap;

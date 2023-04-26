@@ -5,11 +5,13 @@
 #include "Scene.hpp"
 #include "Player.hpp"
 #include "Bot.hpp"
+#include "WebcamManager.hpp"
 
 class SinglePlayer : public Scene
 {
     public:
     SinglePlayer(SDL_Renderer* renderer);
+    ~SinglePlayer();
 
     SceneId run() override;
 
@@ -30,4 +32,5 @@ class SinglePlayer : public Scene
     
     Player m_player;
     Bot m_bot;
+    WebcamManager m_webcamManager;
 };
