@@ -40,7 +40,7 @@ int main()
 	cv::Point oldLHCenter, oldRHCenter;
 	if (!cap.isOpened())
 	{
-		std::cout << "Impossible d'ouvrir la caméra." << std::endl;
+		std::cout << "Impossible d'ouvrir la camï¿½ra." << std::endl;
 		return -1;
 	}
 
@@ -88,7 +88,7 @@ int main()
 			std::string validate_calibration;
 			// The player is asked to validate the calibration only once at the beginning of the game
 			if (firstCalibration) {
-				std::cout << "Êtes-vous satisfait de la calibration? (y/n) : ";
+				std::cout << "ï¿½tes-vous satisfait de la calibration? (y/n) : ";
 				std::cin >> validate_calibration;
 			}
 			else {
@@ -99,8 +99,8 @@ int main()
 				firstCalibration = false;
 				cvtColor(screenshotCalibration, gScreenshot, cv::COLOR_BGR2GRAY);
 				rgbScreenshotCalibration = RGBtorgb(screenshotCalibration);
-				handRgbCalibration = rgbScreenshotCalibration.at<cv::Vec3f>(leftHandCenter - cv::Point(6, 0));
-				rThreshold = handRgbCalibration[2] * (1.0 + THRESHOLD_RATIO);
+				handRgbCalibration = rgbScreenshotCalibration.at<cv::Vec3f>(cv::Point(imageCenter.x - 2 * ellipseSize.width + handSquareSize / 2, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize / 2) - cv::Point(6, 0));
+				rThreshold = handRgbCalibration[2] * (1.0 - THRESHOLD_RATIO);
 				gThreshold = handRgbCalibration[1] * (1.0 + THRESHOLD_RATIO);
 				bThreshold = handRgbCalibration[0] * (1.0 + THRESHOLD_RATIO);
 				leftHandCenter = cv::Point((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
@@ -127,7 +127,7 @@ int main()
 		}
 
 		// Display the video frame with the callibration ellipse and the head center
-		if (croppedHead.empty() ||duringCalibration) {
+		if (croppedHead.empty() || duringCalibration) {
 			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
 			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
 			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
@@ -135,7 +135,7 @@ int main()
 		cv::circle(frame, headCenter, 5, cv::Scalar(0, 0, 255), -1);
 		cv::circle(frame, leftHandCenter, 5, cv::Scalar(0, 255, 0), -1);
 		cv::circle(frame, rightHandCenter, 5, cv::Scalar(0, 255, 0), -1);
-		cv::imshow("Flux vidéo de la caméra", frame);
+		cv::imshow("Flux vidï¿½o de la camï¿½ra", frame);
 
 		// Waitkey for image rendering purpose
 		if (cv::waitKey(1) == 27)
