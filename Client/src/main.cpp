@@ -127,7 +127,7 @@ int main()
 		}
 
 		// Display the video frame with the callibration ellipse and the head center
-		if (croppedHead.empty()) {
+		if (croppedHead.empty() ||duringCalibration) {
 			cv::ellipse(frame, imageCenter, ellipseSize, 0, 0, 360, ellipseColor, 5);
 			cv::rectangle(frame, topLeftLhandCorner, bottomRightLhandCorner, cv::Scalar(0, 255, 0), 5);
 			cv::rectangle(frame, topLeftRhandCorner, bottomRightRhandCorner, cv::Scalar(0, 255, 0), 5);
