@@ -8,7 +8,10 @@ int main()  {
     WSADATA wsaData;
     
     SOCKADDR_IN initServerSocket;
-    initServerSocket.sin_family = AF_INET; initServerSocket.sin_port = htons(SERVER_PORT); initServerSocket.sin_addr.s_addr = INADDR_ANY;
+    unsigned short serverPort = 50000;
+    std::cout << "Server port (min : 49512, max : 65535) : ";
+    std::cin >> serverPort;
+    initServerSocket.sin_family = AF_INET; initServerSocket.sin_port = htons(serverPort); initServerSocket.sin_addr.s_addr = INADDR_ANY;
 
     bool isStarted = false; // vrai lorsque le jeu est lancé
 
@@ -124,7 +127,7 @@ int main()  {
         // arrêt du thread de réception
         stop_flag_recvPlayerDataThread = true;
         SOCKADDR_IN localhostAddr;
-        localhostAddr.sin_family = AF_INET; localhostAddr.sin_port = htons(SERVER_PORT); localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST);
+        localhostAddr.sin_family = AF_INET; localhostAddr.sin_port = htons(serverPort); localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST);
         sendto(serverSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, sizeof(localhostAddr)); // envoi d'un datagramme quelconque
         // en local host pour débloquer la fonction recv du thread une fois 
         recvPlayerDataThread.join();
@@ -153,7 +156,7 @@ void recvPlayerData() {
             if ((nbrBytesReceived == sizeof(receiptBuffer)) && (receiptBuffer.heading == POSITION_HEADING) && (playerFromAddr.count(clientAddr) == 1)) {
                 playerFromAddr[clientAddr]->setLastReceivedData(receiptBuffer);
                 playerFromAddr[clientAddr]->dataAreReceived();
-
+                std::cout << playerFromAddr[clientAddr]->getName() << std::endl;
             }
         }
 

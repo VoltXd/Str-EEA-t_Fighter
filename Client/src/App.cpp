@@ -72,9 +72,9 @@ bool App::exit()
 	return false;
 }
 
-void App::drawRect(float x1, float x2, int size, SDL_Color color)
+void App::drawRect(float x1, float x2, int w, int h, SDL_Color color)
 {
-	SDL_Rect rect1{ x1*m_screenWidth/100 - size / 2, x2*m_screenHeight/100 - size/2, size, size };
+	SDL_Rect rect1{ x1*m_screenWidth/100 - w / 2, x2*m_screenHeight/100 - h/2, w, h };
 	SDL_SetRenderDrawColor(m_renderer, color.r, color.g , color.b, color.a);
 	SDL_RenderFillRect(m_renderer, &rect1);
 }

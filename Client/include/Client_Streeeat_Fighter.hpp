@@ -23,6 +23,8 @@
 #include "headCorrelationTracking.hpp"
 #include "handTracking.hpp"
 
+#define THRESHOLD_RATIO 0.1 // pourcentage des valeurs de rgb de calibration des poings (seuillage)
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -31,7 +33,7 @@
 #define HEAD_WIDTH 40
 #define HEAD_HEIGHT 60
 
-#define TIMEOUT_VALUE 4000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
+#define TIMEOUT_VALUE 7000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
 
 #define LOCAL_HOST "127.0.0.1"
 

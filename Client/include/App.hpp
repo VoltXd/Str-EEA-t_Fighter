@@ -19,7 +19,7 @@ public:
 	~App();
 	int initialise();
 	bool exit();
-	void drawRect(float x1, float x2, int handSize, SDL_Color color);
+	void drawRect(float x1, float x2, int w, int h, SDL_Color color);
 
 	void renderClear();
 	void renderPresent();
