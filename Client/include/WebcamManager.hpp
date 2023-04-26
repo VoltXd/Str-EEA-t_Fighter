@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 #include <chrono>
+#include <SDL.h>
 
 #include "headCalibration.hpp"
 #include "headCorrelationTracking.hpp"
@@ -13,29 +14,39 @@
 class WebcamManager
 {
     public:
-    WebcamManager();
+    WebcamManager(SDL_Renderer* renderer);
 	~WebcamManager();
 
     inline bool isCameraOpened() const { return cap.isOpened(); };
+	inline bool isCalibrating() const { return duringCalibration; };
+ 
+    inline float getHeadX() const { return 100.0f * headCenter.x / frame.cols; };
+    inline float getHeadY() const { return 100.0f * headCenter.y / frame.rows; };
+	
+    inline float getRightHandX() const { return 100.0f * rightHandCenter.x / frame.cols; };
+    inline float getRightHandY() const { return 100.0f * rightHandCenter.y / frame.rows; };
 
-    inline cv::Point getHeadCenter() const { return headCenter; };
-    inline cv::Point getRightHandCenter() const { return rightHandCenter; };
-    inline cv::Point getLeftHandCenter() const { return leftHandCenter; };
-	inline int getFrameWidth() const { return frame.cols; };
-	inline int getFrameHeight() const { return frame.rows; };
-	inline bool isInCalibration() const { return duringCalibration; };
+    inline float getLeftHandX() const { return 100.0f * leftHandCenter.x / frame.cols; };
+    inline float getLeftHandY() const { return 100.0f * leftHandCenter.y / frame.rows; };
 
-	void startCalibration();
-    void nextAction();
+    bool calibrate();
+    bool nextAction();
+    void SDL_renderCalibration();
+    void SDL_renderCalibrationWhilePlaying();
     void CV_render();
 
+    void startCalibration();
     private:
+
+    SDL_Texture* frameTexture;
+	SDL_Renderer* m_renderer;
 
     cv::Mat frame, croppedHead, screenshotCalibration;
 	cv::Mat gCroppedHead, gScreenshot, gFrame;
 	cv::Mat rgbFrame, rgbScreenshotCalibration;
 	cv::Vec3f handRgbCalibration;
 	std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+    bool firstCalibration;
 	bool duringCalibration;
 	bool endCalibrationTimer;
 

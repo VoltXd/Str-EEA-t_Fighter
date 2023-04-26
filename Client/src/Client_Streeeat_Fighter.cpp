@@ -152,7 +152,7 @@ void getAndSendPos() {
     posDataToSend.paused = INITIAL_GAMESTATE;
 
     /* --- Video processing init --- */
-    WebcamManager cam;
+    WebcamManager cam(NULL);
     if (!cam.isCameraOpened()) {
         std::cout << "Unable to open camera" << std::endl;
     }
@@ -177,14 +177,14 @@ void getAndSendPos() {
         /* --- */
 
         /* --- mise en forme des données dans la trame d'envoi --- */
-        posDataToSend.handPos[0].x = (float)cam.getLeftHandCenter().x / cam.getFrameWidth() * 100;
-        posDataToSend.handPos[0].y = (float)cam.getLeftHandCenter().y / cam.getFrameHeight() * 100;
-        posDataToSend.handPos[1].x = (float)cam.getRightHandCenter().x / cam.getFrameWidth() * 100;
-        posDataToSend.handPos[1].y = (float)cam.getRightHandCenter().y / cam.getFrameHeight() * 100;
+        posDataToSend.handPos[0].x = cam.getLeftHandX();
+        posDataToSend.handPos[0].y = cam.getLeftHandY();
+        posDataToSend.handPos[1].x = cam.getRightHandX();
+        posDataToSend.handPos[1].y = cam.getRightHandY();
 
-        posDataToSend.headPos.x = (float)cam.getHeadCenter().x / cam.getFrameWidth() * 100;
-        posDataToSend.headPos.y = (float)cam.getHeadCenter().y / cam.getFrameHeight() * 100;
-        posDataToSend.paused = cam.isInCalibration() ? IS_PAUSED : IS_STARTED;
+        posDataToSend.headPos.x = cam.getHeadX();
+        posDataToSend.headPos.y = cam.getHeadY();
+        posDataToSend.paused = cam.isCalibrating() ? IS_PAUSED : IS_STARTED;
         /* --- */
 
         posDataToSend.date = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
