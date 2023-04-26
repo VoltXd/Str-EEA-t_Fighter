@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <iostream>
 
-#include "Player.hpp"
+#include "PlayerOnline.hpp"
 
 class App	{
 private:

@@ -1,8 +1,8 @@
 #pragma once
 
-/******** Définitions du protocole application spécifique au jeu (encapsulé dans UDP) ********
+/******** Dï¿½finitions du protocole application spï¿½cifique au jeu (encapsulï¿½ dans UDP) ********
 *
-* Les valeurs en float représentent des pourcentages
+* Les valeurs en float reprï¿½sentent des pourcentages
 *
 */
 #include "Vec2D.hpp"
@@ -25,34 +25,34 @@
 #define INITIAL_LIFEBAR 100
 #define INITIAL_STAMINABAR 100
 
-// format des données UDP pour la connection client-serveur
+// format des donnï¿½es UDP pour la connection client-serveur
 typedef struct ClientToServer_Connection {
 	char heading = CONNECTION_HEADING;
 	char playerName[MAX_NBR_LETTERS_IN_PLAYERNAME + 1] = { 0 };
-} ClientToServer_Connection_TypeDef;
+} ClientToServer_Connection;
 
-// format des données UDP pour l'envoi de la position du joueur
+// format des donnï¿½es UDP pour l'envoi de la position du joueur
 typedef struct ClientToServer_Position {
 	char heading = POSITION_HEADING;
 	unsigned long long date; // permet de dater la trame pour le calcul de la latence
 	Vec2D handPos[2];
 	Vec2D headPos;
-	char paused; // état du joueur (recalibration régulièrement nécessaire)
-} ClientToServer_Position_TypeDef;
+	char paused; // ï¿½tat du joueur (recalibration rï¿½guliï¿½rement nï¿½cessaire)
+} ClientToServer_Position;
 
-// format des données UDP pour le lancement du jeu (serveur vers client)
+// format des donnï¿½es UDP pour le lancement du jeu (serveur vers client)
 typedef struct ServerToClient_Start {
 	char heading = START_HEADING;
 	char opponentName[MAX_NBR_LETTERS_IN_PLAYERNAME + 1] = { 0 };
-} ServerToClient_Start_TypeDef;
+} ServerToClient_Start;
 
-// format des données UDP pour l'envoi des données aux clients
+// format des donnï¿½es UDP pour l'envoi des donnï¿½es aux clients
 typedef struct ServerToClient_Data {
-	char heading; 	// heading : P pour les données du Joueur / O pour les données de l'adversaire 
+	char heading; 	// heading : P pour les donnï¿½es du Joueur / O pour les donnï¿½es de l'adversaire 
 	unsigned long long date;
 	Vec2D handPos[2];
 	Vec2D headPos;
 	char paused;
 	float lifeBar;
 	float staminaBar;
-} ServerToClient_Data_TypeDef;
+} ServerToClient_Data;

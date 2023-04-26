@@ -11,7 +11,7 @@
 
 #include "App.hpp"
 #include "Data_structs.hpp"
-#include "Player.hpp"
+#include "PlayerOnline.hpp"
 #include "Timer.hpp"
 
 // partie traitement video
@@ -27,7 +27,7 @@
 #define HEAD_WIDTH 40
 #define HEAD_HEIGHT 60
 
-#define TIMEOUT_VALUE 7000 // temps (ms) à partir duquel la communication avec le serveur est considérée comme perdue
+#define TIMEOUT_VALUE 7000 // temps (ms) ï¿½ partir duquel la communication avec le serveur est considï¿½rï¿½e comme perdue
 
 #define LOCAL_HOST "127.0.0.1"
 
@@ -37,16 +37,16 @@ SOCKADDR_IN serverAddr;
 int serverAddrSize = sizeof(serverAddr);
 SOCKET clientSocket;
 
-Player* player;
-Player* opponent;
+PlayerOnline* player;
+PlayerOnline* opponent;
 
-std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exécution du thread et l'écriture des données reçues
+std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exï¿½cution du thread et l'ï¿½criture des donnï¿½es reï¿½ues
 
-// booléens pour gérer la fin d'exécution des threads
+// boolï¿½ens pour gï¿½rer la fin d'exï¿½cution des threads
 std::atomic<bool> stop_flag_getAndSendPosThread = false;
 std::atomic<bool> stop_flag_recvPlayerDataThread = false;
 
-// fonctions exécutées par les deux threads
+// fonctions exï¿½cutï¿½es par les deux threads
 void getAndSendPos();
 void recvPlayerData();
 

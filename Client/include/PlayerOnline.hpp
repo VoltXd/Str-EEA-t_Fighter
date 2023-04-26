@@ -1,7 +1,7 @@
 #pragma once
 
 /* --- Class Player ---
-* les attributs en float correspondent à des pourcentages
+* les attributs en float correspondent ï¿½ des pourcentages
 */
 
 #include <iostream>
@@ -16,13 +16,13 @@
 #define LOWER_BOUND(value, limit) (value < limit) ? value = limit : value = value 
 #define UPPER_BOUND(value, limit) (value > limit) ? value = limit : value = value
 
-class Player {
+class PlayerOnline {
 private:
 	std::string name;
-	ServerToClient_Data_TypeDef lastReceivedData; // dernières données correctes reçues
-	ServerToClient_Data_TypeDef prevReceivedData; // avant-dernières données correctes reçues
+	ServerToClient_Data lastReceivedData; // derniï¿½res donnï¿½es correctes reï¿½ues
+	ServerToClient_Data prevReceivedData; // avant-derniï¿½res donnï¿½es correctes reï¿½ues
 	Timer<std::chrono::milliseconds> comTimer; // timer pour la gestion de la communication par rapport au temps
-	Timer<std::chrono::microseconds> autoShiftingTimer; // timer pour la gestion du déplacement automatique
+	Timer<std::chrono::microseconds> autoShiftingTimer; // timer pour la gestion du dï¿½placement automatique
 
 	Vec2D leftHandPos, rightHandPos;
 	Vec2D headPos;
@@ -30,18 +30,18 @@ private:
 	float lifeBar;
 	float staminaBar;
 
-	// vitesses pour le déplacement automatique
+	// vitesses pour le dï¿½placement automatique
 	Vec2D leftHandVel, rightHandVel;
 	Vec2D headVel;
 
 public:
-	Player(std::string playerName);
+	PlayerOnline(std::string playerName);
 
 	// set/get methods
-	inline void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
-	inline void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
-	inline ServerToClient_Data_TypeDef& getLastReceivedData() { return lastReceivedData; };
-	inline ServerToClient_Data_TypeDef& getPrevReceivedData() { return prevReceivedData; };
+	inline void setLastReceivedData(ServerToClient_Data lastReceivedData) { this->lastReceivedData = lastReceivedData; };
+	inline void setPrevReceivedData(ServerToClient_Data prevReceivedData) { this->prevReceivedData = prevReceivedData; };
+	inline ServerToClient_Data& getLastReceivedData() { return lastReceivedData; };
+	inline ServerToClient_Data& getPrevReceivedData() { return prevReceivedData; };
 	inline std::string getName() { return name; };
 	inline Vec2D& getLeftHandPos() { return leftHandPos; };
 	inline Vec2D& getRightHandPos() { return rightHandPos; };
@@ -50,10 +50,10 @@ public:
 	inline float getLifeBar() { return lifeBar; };
 	inline float getStaminaBar() { return staminaBar; };
 
-	inline void dataAreReceived() { comTimer.start(); }; // remise à zéro du timer
+	inline void dataAreReceived() { comTimer.start(); }; // remise ï¿½ zï¿½ro du timer
 	inline unsigned long long checkTime() { return comTimer.getTime(); };
 
-	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
-	void setAutoShiftingParameters(); // met à jour les paramètres du déplacement automatique
+	void pullLastReceivedData(); // stocke les donnï¿½es du dernier datagramme reï¿½u dans les caractï¿½ristiques du joueur
+	void setAutoShiftingParameters(); // met ï¿½ jour les paramï¿½tres du dï¿½placement automatique
 	void updatePosAutoShifting(float headWidth, float headHeight, float handWidth, float handHeight);
 };

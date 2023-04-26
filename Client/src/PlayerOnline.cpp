@@ -1,6 +1,6 @@
-#include "Player.hpp"
+#include "PlayerOnline.hpp"
 
-Player::Player(std::string playerName) {
+PlayerOnline::PlayerOnline(std::string playerName) {
 	name = playerName;
 	prevReceivedData = { LOCAL_PLAYER_HEADING, 0, {INITIAL_LEFTHANDPOS, INITIAL_RIGHTHANDPOS}, INITIAL_HEADPOS, INITIAL_GAMESTATE, 
 		INITIAL_LIFEBAR, INITIAL_STAMINABAR};
@@ -15,7 +15,7 @@ Player::Player(std::string playerName) {
 	autoShiftingTimer.start();
 }
 
-void Player::pullLastReceivedData() {
+void PlayerOnline::pullLastReceivedData() {
 	leftHandPos = lastReceivedData.handPos[0];
 	rightHandPos = lastReceivedData.handPos[1];
 	headPos = lastReceivedData.headPos;
@@ -24,7 +24,7 @@ void Player::pullLastReceivedData() {
 	staminaBar = lastReceivedData.staminaBar;
 }
 
-void Player::setAutoShiftingParameters() {
+void PlayerOnline::setAutoShiftingParameters() {
 	unsigned long long delayBtw2LastData = autoShiftingTimer.getTime();
 
 	leftHandVel = (lastReceivedData.handPos[0] - prevReceivedData.handPos[0]) / delayBtw2LastData;
@@ -34,8 +34,8 @@ void Player::setAutoShiftingParameters() {
 	autoShiftingTimer.start();
 }
 
-void Player::updatePosAutoShifting(float headWidth, float headHeight, float handWidth, float handHeight)	{
-// mise à jour des positions automatiquement
+void PlayerOnline::updatePosAutoShifting(float headWidth, float headHeight, float handWidth, float handHeight)	{
+// mise ï¿½ jour des positions automatiquement
 	leftHandPos = leftHandPos + leftHandVel * autoShiftingTimer.getTime();
 	LOWER_BOUND(leftHandPos.x, handWidth/2);
 	UPPER_BOUND(leftHandPos.x, 100 - handWidth/2);

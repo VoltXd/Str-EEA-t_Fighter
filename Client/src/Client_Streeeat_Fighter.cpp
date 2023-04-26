@@ -8,7 +8,7 @@
 int main(int argc, char** argv) {
     WSADATA wsaData;
 
-    bool isStarted = false; // vrai lorsque le jeu est lancé
+    bool isStarted = false; // vrai lorsque le jeu est lancï¿½
 
     // Initialisation Winsock version 2.2
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
         std::cout << "Client: The Winsock DLL status is" << wsaData.szSystemStatus << std::endl;
     }
 
-    // Création du socket pour envoyer des données au serveur (port non occupé choisi automatiquement)
+    // Crï¿½ation du socket pour envoyer des donnï¿½es au serveur (port non occupï¿½ choisi automatiquement)
     clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket == INVALID_SOCKET) {
         std::cout << "Error while creating socket : " << WSAGetLastError() << std::endl;
@@ -39,13 +39,13 @@ int main(int argc, char** argv) {
     /* --- */
 
     while (1) {
-        ClientToServer_Connection_TypeDef connectionData;
-        ServerToClient_Start_TypeDef startData = { 0, {0} };
+        ClientToServer_Connection connectionData;
+        ServerToClient_Start startData = { 0, {0} };
 
         /* --- Demande du nom du joueur --- */
         std::cout << "Player Name (max char. = " << MAX_NBR_LETTERS_IN_PLAYERNAME << ") : ";
         std::cin >> connectionData.playerName;
-        player = new Player(connectionData.playerName); // création du joueur 
+        player = new PlayerOnline(connectionData.playerName); // crï¿½ation du joueur 
         /* --- */
 
         // connexion au serveur et attente de l'autre joueur
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
             nbrBytesReceived = recvfrom(clientSocket, (char*)&startData, sizeof(startData),
                 0, (SOCKADDR*)&serverAddr, &serverAddrSize);
         }
-        opponent = new Player(startData.opponentName);
+        opponent = new PlayerOnline(startData.opponentName);
         std::cout << "Opponent found : " << startData.opponentName << std::endl;
         /* --- */
 
@@ -73,13 +73,13 @@ int main(int argc, char** argv) {
 
         stop_flag_getAndSendPosThread = false;
         stop_flag_recvPlayerDataThread = false;
-        std::thread sendPosThread(getAndSendPos); // lancement du thread qui récupère la position et l'envoit régulièrement au serveur
-        std::thread recvPlayerDataThread(recvPlayerData); // lancement du thread qui récupère régulièrement les données reçues du serveur
+        std::thread sendPosThread(getAndSendPos); // lancement du thread qui rï¿½cupï¿½re la position et l'envoit rï¿½guliï¿½rement au serveur
+        std::thread recvPlayerDataThread(recvPlayerData); // lancement du thread qui rï¿½cupï¿½re rï¿½guliï¿½rement les donnï¿½es reï¿½ues du serveur
 
         player->dataAreReceived();
         opponent->dataAreReceived();
         while (isStarted) {
-            /* --- stockage des données + gestion pertes de communication --- */
+            /* --- stockage des donnï¿½es + gestion pertes de communication --- */
             // gestion perte de communication avec le serveur
             recvDataSyncMutex.lock();
             if (player->checkTime() >= TIMEOUT_VALUE) {
@@ -121,18 +121,18 @@ int main(int argc, char** argv) {
         std::cout << "Game stop - All players are automatically disconnected" << std::endl;
 
         /* --- fermeture des threads --- */
-        // arrêt du thread de l'envoi des positions (fin de la boucle en cours)
+        // arrï¿½t du thread de l'envoi des positions (fin de la boucle en cours)
         stop_flag_getAndSendPosThread = true;
         sendPosThread.join();
 
-        // arrêt du thread de réception
+        // arrï¿½t du thread de rï¿½ception
         stop_flag_recvPlayerDataThread = true;
         SOCKADDR_IN localhostAddr;
         int localhostAddrLength = sizeof(localhostAddr);
-        getsockname(clientSocket, (SOCKADDR*)&localhostAddr, &localhostAddrLength); // récupération du port associé au socket
+        getsockname(clientSocket, (SOCKADDR*)&localhostAddr, &localhostAddrLength); // rï¿½cupï¿½ration du port associï¿½ au socket
         localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST); // adresse local
         sendto(clientSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, localhostAddrLength); // envoi d'un datagramme quelconque
-        // en local host pour débloquer la fonction recv du thread une fois
+        // en local host pour dï¿½bloquer la fonction recv du thread une fois
         recvPlayerDataThread.join();
         /* --- */
 
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 
 void getAndSendPos() {
     // Trame de position pour l'envoi au serveur
-    ClientToServer_Position_TypeDef posDataToSend;
+    ClientToServer_Position posDataToSend;
     posDataToSend.handPos[0] = Vec2D(45, 50), posDataToSend.handPos[1] = Vec2D(55, 50), posDataToSend.headPos = Vec2D(50, 40);
     posDataToSend.paused = INITIAL_GAMESTATE;
 
@@ -176,7 +176,7 @@ void getAndSendPos() {
         cam.CV_render();
         /* --- */
 
-        /* --- mise en forme des données dans la trame d'envoi --- */
+        /* --- mise en forme des donnï¿½es dans la trame d'envoi --- */
         posDataToSend.handPos[0].x = cam.getLeftHandX();
         posDataToSend.handPos[0].y = cam.getLeftHandY();
         posDataToSend.handPos[1].x = cam.getRightHandX();
@@ -197,27 +197,27 @@ void recvPlayerData() {
     unsigned long long latency = 0;
 
     while (!stop_flag_recvPlayerDataThread.load()) {
-        ServerToClient_Data_TypeDef receiptBuffer; // buffer de réception des données d'un joueur
+        ServerToClient_Data receiptBuffer; // buffer de rï¿½ception des donnï¿½es d'un joueur
 
         int nbrBytesReceived = recvfrom(clientSocket, (char*)&receiptBuffer, sizeof(receiptBuffer),
             0, (SOCKADDR*)&serverAddr, &serverAddrSize);
 
-        // si les données sont formattées correctement
+        // si les donnï¿½es sont formattï¿½es correctement
         if (nbrBytesReceived == sizeof(receiptBuffer)) {
             switch (receiptBuffer.heading) {
             case LOCAL_PLAYER_HEADING:
-                recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
+                recvDataSyncMutex.lock(); // attente de la libï¿½ration du mutex et lock du mutex
                 player->setPrevReceivedData(player->getLastReceivedData());
                 player->setLastReceivedData(receiptBuffer);
                 
-                // si les dernières données reçues sont des nouvelles données et non pas les mêmes (données de position uniquement)
+                // si les derniï¿½res donnï¿½es reï¿½ues sont des nouvelles donnï¿½es et non pas les mï¿½mes (donnï¿½es de position uniquement)
                 if (player->getLastReceivedData().date != player->getPrevReceivedData().date) {
                     // calcul de la latence
                     std::chrono::microseconds date(player->getLastReceivedData().date);
                     latency = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()) - date).count();
                     std::cout << "Latency : " << latency << std::endl;
 
-                    // mise à jour des paramètres pour le déplacement
+                    // mise ï¿½ jour des paramï¿½tres pour le dï¿½placement
                     player->setAutoShiftingParameters();
                 }
 
@@ -225,12 +225,12 @@ void recvPlayerData() {
                 recvDataSyncMutex.unlock();
                 break;
             case OPPOSING_PLAYER_HEADING:
-                recvDataSyncMutex.lock(); // attente de la libération du mutex et lock du mutex
+                recvDataSyncMutex.lock(); // attente de la libï¿½ration du mutex et lock du mutex
                 opponent->setPrevReceivedData(opponent->getLastReceivedData());
                 opponent->setLastReceivedData(receiptBuffer);
 
                 if (opponent->getLastReceivedData().date != opponent->getPrevReceivedData().date) {
-                    // mise à jour des paramètres pour le déplacement
+                    // mise ï¿½ jour des paramï¿½tres pour le dï¿½placement
                     opponent->setAutoShiftingParameters();
                 }
                 
