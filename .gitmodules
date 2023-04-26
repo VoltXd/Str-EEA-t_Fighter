@@ -6,10 +6,6 @@
 	path = libraries/opencv
 	url = https://github.com/opencv/opencv.git
 	
-[submodule "libraries/librealsense"]
-	path = libraries/librealsense
-	url = https://github.com/IntelRealSense/librealsense.git
-
 [submodule "libraries/SDL_image"]
 	path = libraries/SDL_image
 	url = https://github.com/libsdl-org/SDL_image.git
