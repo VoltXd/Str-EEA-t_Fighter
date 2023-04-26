@@ -18,7 +18,8 @@ class WebcamManager
 	~WebcamManager();
 
     inline bool isCameraOpened() const { return cap.isOpened(); };
-
+	inline bool isCalibrating() const { return duringCalibration; };
+ 
     inline float getHeadX() const { return 100.0f * headCenter.x / frame.cols; };
     inline float getHeadY() const { return 100.0f * headCenter.y / frame.rows; };
 	
@@ -28,15 +29,17 @@ class WebcamManager
     inline float getLeftHandX() const { return 100.0f * leftHandCenter.x / frame.cols; };
     inline float getLeftHandY() const { return 100.0f * leftHandCenter.y / frame.rows; };
 
-    bool calibrate(SDL_Renderer* renderer);
+    bool calibrate();
     bool nextAction();
-    void SDL_renderCalibration(SDL_Renderer* renderer);
+    void SDL_renderCalibration();
+    void SDL_renderCalibrationWhilePlaying();
     void CV_render();
 
-    private:
     void startCalibration();
+    private:
 
     SDL_Texture* frameTexture;
+	SDL_Renderer* m_renderer;
 
     cv::Mat frame, croppedHead, screenshotCalibration;
 	cv::Mat gCroppedHead, gScreenshot, gFrame;

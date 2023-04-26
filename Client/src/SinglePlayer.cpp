@@ -35,7 +35,7 @@ SceneId SinglePlayer::run()
         return SceneId::MainMenu;
 
     // Calibrate before entering the game loop
-    if (!m_webcamManager.calibrate(m_renderer))
+    if (!m_webcamManager.calibrate())
         return SceneId::MainMenu;
     
     while (m_isRunning)
@@ -106,6 +106,10 @@ void SinglePlayer::input()
                     m_isRunning = false;
                     m_nextScene = SceneId::MainMenu;
                 }
+                else if (event.key.keysym.sym == SDLK_RETURN ||event.key.keysym.sym == SDLK_KP_ENTER)
+                {
+                    m_webcamManager.startCalibration();
+                }
                 break;
 			
 			default:
@@ -168,6 +172,9 @@ void SinglePlayer::render()
     SDL_RenderClear(m_renderer);
 
     SDL_RenderCopy(m_renderer, m_backgroundTexture, nullptr, nullptr);
+
+    if (m_webcamManager.isCalibrating())
+        m_webcamManager.SDL_renderCalibrationWhilePlaying();
 
     m_player.render(m_renderer);
     m_bot.render(m_renderer);

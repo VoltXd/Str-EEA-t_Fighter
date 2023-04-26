@@ -1,4 +1,5 @@
 #include "WebcamManager.hpp"
+#include "Settings.hpp"
 
 #include <opencv2/core/types_c.h>
 
@@ -19,14 +20,15 @@ WebcamManager::WebcamManager(SDL_Renderer* renderer)
 	endCalibrationTimer = false;
 	firstCalibration = true;
 	rThreshold = 0., gThreshold = 0., bThreshold = 0.;
-
+	
 	headCenter = imageCenter;
 
 	// Texture creation (WARNING : REALLY UNSAFE)
 	// TODO: Make it safer
 	cap >> frame;
 	
-	frameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, frame.cols, frame.rows);
+	m_renderer = renderer;
+	frameTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_BGR24, SDL_TEXTUREACCESS_STREAMING, frame.cols, frame.rows);
 }
 
 
@@ -35,7 +37,7 @@ WebcamManager::~WebcamManager()
 	SDL_DestroyTexture(frameTexture);
 }
 
-bool WebcamManager::calibrate(SDL_Renderer* renderer)
+bool WebcamManager::calibrate()
 {
 	bool hasCalibrationSucceed = false;
 
@@ -75,7 +77,7 @@ bool WebcamManager::calibrate(SDL_Renderer* renderer)
 			return hasCalibrationSucceed;
 
 		// Render
-		SDL_renderCalibration(renderer);
+		SDL_renderCalibration();
 	}
 	
 	return hasCalibrationSucceed;
@@ -128,10 +130,12 @@ bool WebcamManager::nextAction()
 
 		cvtColor(screenshotCalibration, gScreenshot, cv::COLOR_BGR2GRAY);
 		rgbScreenshotCalibration = RGBtorgb(screenshotCalibration);
-		handRgbCalibration = rgbScreenshotCalibration.at<cv::Vec3f>(leftHandCenter - cv::Point(6, 0));
-		rThreshold = handRgbCalibration[2] * (1.0 + THRESHOLD_RATIO);
+		handRgbCalibration = rgbScreenshotCalibration.at<cv::Vec3f>(cv::Point(imageCenter.x - 2 * ellipseSize.width + handSquareSize / 2, imageCenter.y + ellipseSize.height * 3 / 2 + handSquareSize / 2) - cv::Point(6, 0));
+		rThreshold = handRgbCalibration[2] * (1.0 - THRESHOLD_RATIO);
 		gThreshold = handRgbCalibration[1] * (1.0 + THRESHOLD_RATIO);
 		bThreshold = handRgbCalibration[0] * (1.0 + THRESHOLD_RATIO);
+		leftHandCenter = cv::Point((topLeftLhandCorner.x + handSquareSize / 2), (topLeftLhandCorner.y + handSquareSize / 2));
+		rightHandCenter = cv::Point((topLeftRhandCorner.x + handSquareSize / 2), (topLeftRhandCorner.y + handSquareSize / 2));
 		cv::equalizeHist(gScreenshot, gScreenshot);
 		// Saving the cropped head
 		croppedHead = headCalibration(imageCenter, ellipseSize, frame);
@@ -165,18 +169,25 @@ bool WebcamManager::nextAction()
 	return true;
 }
 
-void WebcamManager::SDL_renderCalibration(SDL_Renderer* renderer)
+void WebcamManager::SDL_renderCalibration()
 {
 	// Clear
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+	SDL_RenderClear(m_renderer);
 
 	// Update texture
 	SDL_UpdateTexture(frameTexture, nullptr, (void*)frame.data, frame.step1());
-	SDL_RenderCopy(renderer, frameTexture, nullptr, nullptr);
+	SDL_RenderCopy(m_renderer, frameTexture, nullptr, nullptr);
 
 	// Render
-	SDL_RenderPresent(renderer);
+	SDL_RenderPresent(m_renderer);
+}
+
+void WebcamManager::SDL_renderCalibrationWhilePlaying()
+{
+	// Update texture
+	SDL_UpdateTexture(frameTexture, nullptr, (void*)frame.data, frame.step1());
+	SDL_RenderCopy(m_renderer, frameTexture, nullptr, nullptr);
 }
 
 void WebcamManager::CV_render()
