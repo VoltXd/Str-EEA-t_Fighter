@@ -5,7 +5,7 @@
 
 #include "Client_Streeeat_Fighter.hpp"
 
-int main(int argc, char** argv) {
+int main_(int argc, char** argv) {
     WSADATA wsaData;
 
     bool isStarted = false; // vrai lorsque le jeu est lanc�
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 
         std::cout << "Game start" << std::endl;
         isStarted = true;
-        app = new App(SCREEN_WIDTH, SCREEN_HEIGHT);
+        // app = new App(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         stop_flag_getAndSendPosThread = false;
         stop_flag_recvPlayerDataThread = false;
@@ -102,18 +102,18 @@ int main(int argc, char** argv) {
             /* --- */
 
             /* --- Affichage graphique des joueurs --- */
-            if (app->exit()) isStarted = false;
+            // if (app->exit()) isStarted = false;
             if (!player->isPaused() && !opponent->isPaused()) {
-                app->renderClear();
-                // joueur local
-                app->drawRect(player->getLeftHandPos().x, player->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
-                app->drawRect(player->getRightHandPos().x, player->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
-                app->drawRect(player->getHeadPos().x, player->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,255,255,255 });
-                // adversaire
-                app->drawRect(opponent->getLeftHandPos().x, opponent->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
-                app->drawRect(opponent->getRightHandPos().x, opponent->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
-                app->drawRect(opponent->getHeadPos().x, opponent->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,0,0,255 });
-                app->renderPresent();
+                // app->renderClear();
+                // // joueur local
+                // app->drawRect(player->getLeftHandPos().x, player->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
+                // app->drawRect(player->getRightHandPos().x, player->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,255,255,255 });
+                // app->drawRect(player->getHeadPos().x, player->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,255,255,255 });
+                // // adversaire
+                // app->drawRect(opponent->getLeftHandPos().x, opponent->getLeftHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
+                // app->drawRect(opponent->getRightHandPos().x, opponent->getRightHandPos().y, HAND_WIDTH, HAND_HEIGHT, { 255,0,0,255 });
+                // app->drawRect(opponent->getHeadPos().x, opponent->getHeadPos().y, HEAD_WIDTH, HEAD_HEIGHT, { 255,0,0,255 });
+                // app->renderPresent();
             }
             /* --- */
         }

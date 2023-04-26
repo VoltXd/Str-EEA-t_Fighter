@@ -26,6 +26,7 @@ MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer)
 
 MultiPlayerMenu::~MultiPlayerMenu()
 {
+    SDL_DestroyTexture(m_buttonTexture);
     TTF_CloseFont(m_textFont);
     SDL_StopTextInput();
 }
@@ -42,8 +43,6 @@ SceneId MultiPlayerMenu::run()
         render();
     }
 
-    TTF_CloseFont(m_textFont);
-    SDL_StopTextInput();
     return m_nextScene;
 }
 
