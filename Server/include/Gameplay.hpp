@@ -5,7 +5,7 @@
 #include "Timer.hpp"
 
 #define PUNCH_DEPTH_SUP_LIMIT 80 // si l'on est en dessus on considère qu'un coup est donné (en % de punch_depth_range)
-#define PUNCH_DEPTH_RANGE 100 // amplitude du coup max (distance centre tête - poing le plus haut) : définie lors de la calibration 
+#define PUNCH_DEPTH_RANGE 33 // amplitude du coup max (distance centre tête - poing le plus haut) : définie lors de la calibration 
 #define HP_LOSS_PER_PUNCH 10 
 #define STAMINA_LOSS_PER_PUNCH 10 // perte de stamina par coup donné
 #define STAMINA_LOSS_NOT_IDLE_VELOCITY 0.001 // vitesse de décroisement en position de hors-repos de la stamina barre (en %/ms)

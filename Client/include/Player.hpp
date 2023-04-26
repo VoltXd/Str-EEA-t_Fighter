@@ -38,20 +38,20 @@ public:
 	Player(std::string playerName);
 
 	// set/get methods
-	void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
-	void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
-	ServerToClient_Data_TypeDef& getLastReceivedData() { return lastReceivedData; };
-	ServerToClient_Data_TypeDef& getPrevReceivedData() { return prevReceivedData; };
-	std::string getName() { return name; };
-	Vec2D& getLeftHandPos() { return leftHandPos; };
-	Vec2D& getRightHandPos() { return rightHandPos; };
-	Vec2D& getHeadPos() { return headPos; };
-	char isPaused() { return paused; };
-	float getLifeBar() { return lifeBar; };
-	float getStaminaBar() { return staminaBar; };
+	inline void setLastReceivedData(ServerToClient_Data_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
+	inline void setPrevReceivedData(ServerToClient_Data_TypeDef prevReceivedData) { this->prevReceivedData = prevReceivedData; };
+	inline ServerToClient_Data_TypeDef& getLastReceivedData() { return lastReceivedData; };
+	inline ServerToClient_Data_TypeDef& getPrevReceivedData() { return prevReceivedData; };
+	inline std::string getName() { return name; };
+	inline Vec2D& getLeftHandPos() { return leftHandPos; };
+	inline Vec2D& getRightHandPos() { return rightHandPos; };
+	inline Vec2D& getHeadPos() { return headPos; };
+	inline char isPaused() { return paused; };
+	inline float getLifeBar() { return lifeBar; };
+	inline float getStaminaBar() { return staminaBar; };
 
-	void dataAreReceived() { comTimer.start(); }; // remise à zéro du timer
-	unsigned long long checkTime() { return comTimer.getTime(); };
+	inline void dataAreReceived() { comTimer.start(); }; // remise à zéro du timer
+	inline unsigned long long checkTime() { return comTimer.getTime(); };
 
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu dans les caractéristiques du joueur
 	void setAutoShiftingParameters(); // met à jour les paramètres du déplacement automatique

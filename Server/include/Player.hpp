@@ -35,28 +35,28 @@ public :
 	Player();
 
 	// set/get methods
-	void setName(const char* name) { this->name = std::string(name); };
-	void setName(const std::string& name) { this->name = std::string(name); };
-	void setAddr(SOCKADDR_IN addr) { this->addr = addr; };
-	void setLastReceivedData(ClientToServer_Position_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
-	void setLifeBar(float lifeBar) { this->lifeBar = lifeBar; };
-	void setStaminaBar(float staminaBar) { this->staminaBar = staminaBar; };
-	void setGuard(bool onGuard) { this->onGuard = onGuard; };
-	void setPunch(bool punched) { this->punched = punched; };
+	inline void setName(const char* name) { this->name = std::string(name); };
+	inline void setName(const std::string& name) { this->name = std::string(name); };
+	inline void setAddr(SOCKADDR_IN addr) { this->addr = addr; };
+	inline void setLastReceivedData(ClientToServer_Position_TypeDef lastReceivedData) { this->lastReceivedData = lastReceivedData; };
+	inline void setLifeBar(float lifeBar) { this->lifeBar = lifeBar; };
+	inline void setStaminaBar(float staminaBar) { this->staminaBar = staminaBar; };
+	inline void setGuard(bool onGuard) { this->onGuard = onGuard; };
+	inline void setPunch(bool punched) { this->punched = punched; };
 
-	std::string getName() { return name; };
-	SOCKADDR_IN& getAddr() { return addr; };
-	Vec2D& getLeftHandPos() { return leftHandPos; };
-	Vec2D& getRightHandPos() { return rightHandPos; };
-	Vec2D& getHeadPos() { return headPos; };
-	char isPaused() { return paused; };
-	float getLifeBar() { return lifeBar; };
-	float getStaminaBar() { return staminaBar; };
-	bool isOnGuard() { return onGuard; };
-	bool hasPunched() { return punched; };
+	inline std::string getName() { return name; };
+	inline SOCKADDR_IN& getAddr() { return addr; };
+	inline Vec2D& getLeftHandPos() { return leftHandPos; };
+	inline Vec2D& getRightHandPos() { return rightHandPos; };
+	inline Vec2D& getHeadPos() { return headPos; };
+	inline char isPaused() { return paused; };
+	inline float getLifeBar() { return lifeBar; };
+	inline float getStaminaBar() { return staminaBar; };
+	inline bool isOnGuard() { return onGuard; };
+	inline bool hasPunched() { return punched; };
 
-	void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
-	unsigned long long checkTime() { return comLossesTimer.getTime(); };
+	inline void dataAreReceived() { comLossesTimer.start(); }; // remise à zéro du timer
+	inline unsigned long long checkTime() { return comLossesTimer.getTime(); };
 
 	void sendStartDatagram(SOCKET& socket, std::string opponentName); // envoi du datagramme pour le démarrage du jeu
 	void pullLastReceivedData(); // stocke les données du dernier datagramme reçu
