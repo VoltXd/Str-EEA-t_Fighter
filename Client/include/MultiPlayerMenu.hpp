@@ -11,6 +11,7 @@ class MultiPlayerMenu : public Scene
 {
     public:
     MultiPlayerMenu(SDL_Renderer* renderer);
+    ~MultiPlayerMenu();
 
     SceneId run() override;
 

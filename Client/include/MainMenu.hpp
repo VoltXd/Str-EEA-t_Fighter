@@ -10,6 +10,7 @@ class MainMenu : public Scene
 {
     public:
     MainMenu(SDL_Renderer* renderer);
+    ~MainMenu();
 
     SceneId run() override;
 

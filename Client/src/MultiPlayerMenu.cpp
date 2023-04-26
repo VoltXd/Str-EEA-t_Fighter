@@ -24,6 +24,12 @@ MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer)
     m_isRunning = true;
 }
 
+MultiPlayerMenu::~MultiPlayerMenu()
+{
+    TTF_CloseFont(m_textFont);
+    SDL_StopTextInput();
+}
+
 SceneId MultiPlayerMenu::run()
 {
     if (initialise() != EXIT_SUCCESS)

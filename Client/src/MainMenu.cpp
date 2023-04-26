@@ -24,6 +24,13 @@ MainMenu::MainMenu(SDL_Renderer* renderer)
     m_isRunning = true;
 }
 
+MainMenu::~MainMenu()
+{
+    SDL_DestroyTexture(m_buttonTexture);
+    SDL_DestroyTexture(m_backgroundTexture);
+    TTF_CloseFont(m_buttonFont);
+}
+
 SceneId MainMenu::run() 
 {
     if (initialise() != EXIT_SUCCESS)
@@ -35,10 +42,6 @@ SceneId MainMenu::run()
         update();
         render();
     }
-
-    SDL_DestroyTexture(m_buttonTexture);
-    SDL_DestroyTexture(m_backgroundTexture);
-    TTF_CloseFont(m_buttonFont);
 
     return m_nextScene;
 }

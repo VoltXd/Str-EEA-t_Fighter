@@ -7,15 +7,13 @@
 #include "Toolbox.hpp"
 
 // Dummy controler
-static float tempXHead = 50;
-static bool isLeftMoving = false;
-static bool isRightMoving = false;
 static bool isPlayerStartingPunchingLeft = false;
 static bool isPlayerStartingPunchingRight = false;
 
 SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
-    : m_player(Player()),
-      m_bot(Bot())
+    : m_player(),
+      m_bot(),
+      m_webcamManager(renderer)
 {
     m_renderer = renderer;
 
@@ -27,11 +25,17 @@ SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
     m_playerHandTexture = nullptr;
 
     m_previousTimePoint = std::chrono::high_resolution_clock::now();
+
+    m_isCameraInfoAvailable = false;
 }
 
 SceneId SinglePlayer::run()
 {
     if (initialise() != EXIT_SUCCESS)
+        return SceneId::MainMenu;
+
+    // Calibrate before entering the game loop
+    if (!m_webcamManager.calibrate())
         return SceneId::MainMenu;
     
     while (m_isRunning)
@@ -41,12 +45,15 @@ SceneId SinglePlayer::run()
         render();
     }
 
+    return m_nextScene;
+}
+
+SinglePlayer::~SinglePlayer() 
+{
     // Free textures
     SDL_DestroyTexture(m_backgroundTexture);
     SDL_DestroyTexture(m_playerHeadTexture);
     SDL_DestroyTexture(m_playerHandTexture);
-
-    return m_nextScene;
 }
 
 int SinglePlayer::initialise()
@@ -99,48 +106,27 @@ void SinglePlayer::input()
                     m_isRunning = false;
                     m_nextScene = SceneId::MainMenu;
                 }
-                else if (event.key.keysym.sym == SDLK_q)
+                else if (event.key.keysym.sym == SDLK_RETURN ||event.key.keysym.sym == SDLK_KP_ENTER)
                 {
-                    isPlayerStartingPunchingLeft = true;
+                    m_webcamManager.startCalibration();
                 }
-                else if (event.key.keysym.sym == SDLK_d)
-                {
-                    isPlayerStartingPunchingRight = true;
-                }
-                break;
-
-            case SDL_MOUSEMOTION:
-                tempXHead = 100.0f * event.motion.x / settings.screenWidth;
-                break;
-            
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    isLeftMoving = true;
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    isRightMoving = true;
-                break;
-            
-            case SDL_MOUSEBUTTONUP:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                    isLeftMoving = false;
-                else if (event.button.button == SDL_BUTTON_RIGHT)
-                    isRightMoving = false;
                 break;
 			
 			default:
 				break;
 		}
 	}
+
+    // Open cv Head & hands detection Input
+    m_isCameraInfoAvailable = m_webcamManager.nextAction();
 }
 
 void SinglePlayer::update()
 {
-    // Current player controls (Mouse and clicks)
-    m_player.setHeadPosition(tempXHead);
-    if (isLeftMoving)
-        m_player.setLeftHandPosition(tempXHead);
-    if (isRightMoving)
-        m_player.setRightHandPosition(tempXHead);
+    // Player controls
+    m_player.setHeadPosition(m_webcamManager.getHeadX());
+    m_player.setLeftHandPosition(m_webcamManager.getLeftHandX());
+    m_player.setRightHandPosition(m_webcamManager.getRightHandX());
 
     // Aim bot
     m_bot.calculateNextAction(m_player);
@@ -186,6 +172,9 @@ void SinglePlayer::render()
     SDL_RenderClear(m_renderer);
 
     SDL_RenderCopy(m_renderer, m_backgroundTexture, nullptr, nullptr);
+
+    if (m_webcamManager.isCalibrating())
+        m_webcamManager.SDL_renderCalibrationWhilePlaying();
 
     m_player.render(m_renderer);
     m_bot.render(m_renderer);
