@@ -70,21 +70,6 @@ cmake --install ./build --prefix "%install_path%\opencv_4.7.0"
 RD /S /Q "./build"
 cd ../..
 
-:: ______________Install LibRealSense______________ ::
-cd ./libraries/librealsense
-
-:: Build LibRealSense for VS 2022 x64
-cmake -B ./build -G "Visual Studio 16 2019" -A x64  
-cmake --build ./build --config Release
-
-:: Install LibRealSense at "C:\lib_visual_cpp\realsense2_v2.53.1"
-RD /S /Q "%install_path%\realsense2_v2.53.1"
-cmake --install ./build --prefix "%install_path%\realsense2_v2.53.1"
-
-:: Remove LibRealSense build
-RD /S /Q "./build"
-cd ../..
-
 :: ______________Install SDL_image______________ ::
 cd ./libraries/SDL_image
 

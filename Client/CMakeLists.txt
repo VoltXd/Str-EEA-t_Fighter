@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.7 )
+cmake_minimum_required( VERSION 3.8 )
 
 # Project 
 project(Str-EEA-t_Fighter)
@@ -25,11 +25,11 @@ find_package(SDL2_mixer REQUIRED)
 # Look for SDL2_TTF Packages
 find_package(SDL2_ttf REQUIRED)
 
-# Look for Lib realsense Packages
-find_package(realsense2 REQUIRED CONFIG)
-
 # Make the executable with the headers & sources
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+
+# Set the directory where CMakeLists.txt is to be the working directory
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
 # Target the include folder (used to make headers visible in visual studio)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
@@ -51,9 +51,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_image::SDL2_image)
 
 # Link to the SDL2_mixer library
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_mixer::SDL2_mixer)
-
-# Link to the realsense2 library
-target_link_libraries(${PROJECT_NAME} PRIVATE ${realsense2_LIBRARY})
 
 # Link OpenCV libraries
 target_link_libraries( ${PROJECT_NAME} PRIVATE ${OpenCV_LIBS} )
