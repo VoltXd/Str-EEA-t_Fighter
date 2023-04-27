@@ -9,9 +9,16 @@
 
 #include <WinSock2.h> 
 
+#include <SDL.h>
+
 #include "Data_structs.hpp"
 #include "Vec2D.hpp"
 #include "Timer.hpp"
+
+#define HAND_WIDTH 20
+#define HAND_HEIGHT 20
+#define HEAD_WIDTH 40
+#define HEAD_HEIGHT 60
 
 #define LOWER_BOUND(value, limit) (value < limit) ? value = limit : value = value 
 #define UPPER_BOUND(value, limit) (value > limit) ? value = limit : value = value
@@ -33,6 +40,10 @@ private:
 	// vitesses pour le d�placement automatique
 	Vec2D leftHandVel, rightHandVel;
 	Vec2D headVel;
+
+	SDL_Rect leftHandRect;
+	SDL_Rect rightHandRect;
+	SDL_Rect headRect;
 
 public:
 	PlayerOnline(std::string playerName);
@@ -56,4 +67,6 @@ public:
 	void pullLastReceivedData(); // stocke les donn�es du dernier datagramme re�u dans les caract�ristiques du joueur
 	void setAutoShiftingParameters(); // met � jour les param�tres du d�placement automatique
 	void updatePosAutoShifting(float headWidth, float headHeight, float handWidth, float handHeight);
+
+	void render(SDL_Renderer* renderer);
 };

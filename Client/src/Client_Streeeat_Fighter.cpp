@@ -4,11 +4,158 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include "Client_Streeeat_Fighter.hpp"
+#include <SDL.h>
 
-int main_(int argc, char** argv) {
+unsigned short SERVER_PORT;
+std::string SERVER_IP_ADDRESS;
+SOCKADDR_IN serverAddr;
+int serverAddrSize = sizeof(serverAddr);
+SOCKET clientSocket;
+
+PlayerOnline* player;
+PlayerOnline* opponent;
+
+std::mutex recvDataSyncMutex; // mutex pour la gestion de l'ex�cution du thread et l'�criture des donn�es re�ues
+
+std::thread sendPosThread;
+std::thread recvPlayerDataThread; 
+
+// bool�ens pour g�rer la fin d'ex�cution des threads
+std::atomic<bool> stop_flag_getAndSendPosThread = false;
+std::atomic<bool> stop_flag_recvPlayerDataThread = false;
+
+int initClientSocket(const std::string& ip, unsigned short port)
+{
     WSADATA wsaData;
 
+    // Initialisation Winsock version 2.2
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Client: WSAStartup failed with error", itoa(WSAGetLastError(), nullptr, 10), nullptr);
+        return EXIT_FAILURE;
+    }
+
+    // Cr�ation du socket pour envoyer des donn�es au serveur (port non occup� choisi automatiquement)
+    clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (clientSocket == INVALID_SOCKET) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error while creating socket : ", itoa(WSAGetLastError(), nullptr, 10), nullptr);
+        return EXIT_FAILURE;
+    }
+    
+    /* --- Demande des informations du serveur (IP + Port) --- */
+    SERVER_IP_ADDRESS = ip;
+    SERVER_PORT = port;
+    /* --- */
+
+    // Configuration du serveur cible
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP_ADDRESS.c_str()); 
+    serverAddr.sin_port = htons(SERVER_PORT);
+
+    return EXIT_SUCCESS;
+}
+
+void closeClientSocket()
+{
+    /* --- fermeture des threads --- */
+    // arr�t du thread de l'envoi des positions (fin de la boucle en cours)
+    stop_flag_getAndSendPosThread = true;
+    sendPosThread.join();
+
+    // arr�t du thread de r�ception
+    stop_flag_recvPlayerDataThread = true;
+    SOCKADDR_IN localhostAddr;
+    int localhostAddrLength = sizeof(localhostAddr);
+    getsockname(clientSocket, (SOCKADDR*)&localhostAddr, &localhostAddrLength); // r�cup�ration du port associ� au socket
+    localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST); // adresse local
+    sendto(clientSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, localhostAddrLength); // envoi d'un datagramme quelconque
+    // en local host pour d�bloquer la fonction recv du thread une fois
+    recvPlayerDataThread.join();
+    /* --- */
+
+    delete player;
+    delete opponent;
+    
+    closesocket(clientSocket);
+    WSACleanup();
+}
+
+void connectToSFServer()
+{
+    ClientToServer_Connection connectionData;
+    ServerToClient_Start startData = { 0, {0} };
+
+    /* --- Nom du joueur --- */
+    strncpy(connectionData.playerName, "IronMike", MAX_NBR_LETTERS_IN_PLAYERNAME);
+    player = new PlayerOnline(connectionData.playerName); // cr�ation du joueur 
+    /* --- */
+
+    /* --- Demande de connexion au serveur --- */
+    sendto(clientSocket, (const char*)&connectionData, sizeof(connectionData), 0, (SOCKADDR*)&serverAddr, serverAddrSize);
+    /* --- */
+
+    /* --- Attente de la connexion de l'autre joueur en ligne --- */
+    int nbrBytesReceived = 0;
+    while ((nbrBytesReceived != sizeof(startData)) || (startData.heading != START_HEADING)) {
+        nbrBytesReceived = recvfrom(clientSocket, (char*)&startData, sizeof(startData),
+            0, (SOCKADDR*)&serverAddr, &serverAddrSize);
+    }
+    opponent = new PlayerOnline(startData.opponentName);
+    /* --- */
+
+    // std::cout << "Game start" << std::endl;
+}
+
+void startClientCommunication()
+{
+    stop_flag_getAndSendPosThread = false;
+    stop_flag_recvPlayerDataThread = false;
+    sendPosThread = std::thread(getAndSendPos); // lancement du thread qui r�cup�re la position et l'envoit r�guli�rement au serveur
+    recvPlayerDataThread = std::thread(recvPlayerData); // lancement du thread qui r�cup�re r�guli�rement les donn�es re�ues du serveur
+
+    player->dataAreReceived();
+    opponent->dataAreReceived();
+}
+
+bool updateClientData()
+{
+    bool isRunning = true;
+    /* --- stockage des donn�es + gestion pertes de communication --- */
+    // gestion perte de communication avec le serveur
+    recvDataSyncMutex.lock();
+    if (player->checkTime() >= TIMEOUT_VALUE) {
+        std::cout << "No data received for the local player " << player->getName() << " - Timeout reached" << std::endl;
+        isRunning = false;
+    }
+    if (opponent->checkTime() >= TIMEOUT_VALUE) {
+        std::cout << "No data received for the opponent " << opponent->getName() << " - Timeout reached" << std::endl;
+        isRunning = false;
+    }
+
+    player->pullLastReceivedData();
+    player->updatePosAutoShifting((float)HEAD_WIDTH / SCREEN_WIDTH, (float)HEAD_HEIGHT / SCREEN_HEIGHT, 
+        (float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_HEIGHT / SCREEN_HEIGHT);
+    opponent->pullLastReceivedData();
+    opponent->updatePosAutoShifting((float)HEAD_WIDTH / SCREEN_WIDTH, (float)HEAD_HEIGHT / SCREEN_HEIGHT,
+        (float)HAND_WIDTH / SCREEN_WIDTH, (float)HAND_HEIGHT / SCREEN_HEIGHT);
+
+    recvDataSyncMutex.unlock();
+
+    return isRunning;
+}
+
+void renderClient(SDL_Renderer* renderer)
+{
+    if (!player->isPaused() && !opponent->isPaused()) {  
+         
+    player->render(renderer);
+    opponent->render(renderer);
+    }
+}
+
+int main_(int argc, char** argv) {
     bool isStarted = false; // vrai lorsque le jeu est lanc�
+
+    WSADATA wsaData;
 
     // Initialisation Winsock version 2.2
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -73,8 +220,8 @@ int main_(int argc, char** argv) {
 
         stop_flag_getAndSendPosThread = false;
         stop_flag_recvPlayerDataThread = false;
-        std::thread sendPosThread(getAndSendPos); // lancement du thread qui r�cup�re la position et l'envoit r�guli�rement au serveur
-        std::thread recvPlayerDataThread(recvPlayerData); // lancement du thread qui r�cup�re r�guli�rement les donn�es re�ues du serveur
+        std::thread mainSendPosThread(getAndSendPos); // lancement du thread qui r�cup�re la position et l'envoit r�guli�rement au serveur
+        std::thread mainRecvPlayerDataThread(recvPlayerData); // lancement du thread qui r�cup�re r�guli�rement les donn�es re�ues du serveur
 
         player->dataAreReceived();
         opponent->dataAreReceived();
@@ -117,13 +264,12 @@ int main_(int argc, char** argv) {
             }
             /* --- */
         }
-        delete app;
         std::cout << "Game stop - All players are automatically disconnected" << std::endl;
 
         /* --- fermeture des threads --- */
         // arr�t du thread de l'envoi des positions (fin de la boucle en cours)
         stop_flag_getAndSendPosThread = true;
-        sendPosThread.join();
+        mainSendPosThread.join();
 
         // arr�t du thread de r�ception
         stop_flag_recvPlayerDataThread = true;
@@ -133,7 +279,7 @@ int main_(int argc, char** argv) {
         localhostAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST); // adresse local
         sendto(clientSocket, "0", 1, 0, (SOCKADDR*)&localhostAddr, localhostAddrLength); // envoi d'un datagramme quelconque
         // en local host pour d�bloquer la fonction recv du thread une fois
-        recvPlayerDataThread.join();
+        mainRecvPlayerDataThread.join();
         /* --- */
 
         delete player;

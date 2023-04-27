@@ -17,7 +17,7 @@
 #include "Gameplay.hpp"
 #include "Timer.hpp"
 
-#define TIMEOUT_VALUE 7000 // temps (ms) à partir duquel la communication avec les clients (ou un client) est considérée comme perdue
+#define TIMEOUT_VALUE 15000 // temps (ms) ï¿½ partir duquel la communication avec les clients (ou un client) est considï¿½rï¿½e comme perdue
 
 #define LOCAL_HOST "127.0.0.1"
 
@@ -25,12 +25,12 @@ SOCKET serverSocket;
 SOCKADDR_IN clientAddr;
 int clientAddrSize = sizeof(clientAddr);
 
-std::map<SOCKADDR_IN, Player*> playerFromAddr; // association d'un joueur à chaque client
+std::map<SOCKADDR_IN, Player*> playerFromAddr; // association d'un joueur ï¿½ chaque client
 
-std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exécution du thread et l'écriture des données reçues
+std::mutex recvDataSyncMutex; // mutex pour la gestion de l'exï¿½cution du thread et l'ï¿½criture des donnï¿½es reï¿½ues
 std::atomic<bool> dataReceived = false;
 
 std::atomic<bool> stop_flag_recvPlayerDataThread = false;
 void recvPlayerData();
 
-bool operator<(const SOCKADDR_IN sockaddr1, const SOCKADDR_IN sockaddr2); // nécessaire pour le conteneur map
+bool operator<(const SOCKADDR_IN sockaddr1, const SOCKADDR_IN sockaddr2); // nï¿½cessaire pour le conteneur map

@@ -8,6 +8,7 @@
 #include "MainMenu.hpp"
 #include "SinglePlayer.hpp"
 #include "MultiPlayerMenu.hpp"
+#include "MultiPlayer.hpp"
 #include "Settings.hpp"
 
 App::App()
@@ -51,6 +52,13 @@ int App::run()
 			{
 				MultiPlayerMenu multiPlayerMenu(m_renderer);
 				currentScene = multiPlayerMenu.run();
+				break;
+			}
+
+			case SceneId::MultiPlayer:
+			{
+				MultiPlayer multiPlayer(m_renderer);
+				currentScene = multiPlayer.run();
 				break;
 			}
 			
