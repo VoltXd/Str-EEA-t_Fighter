@@ -29,6 +29,14 @@ SinglePlayer::SinglePlayer(SDL_Renderer* renderer)
     m_isCameraInfoAvailable = false;
 }
 
+SinglePlayer::~SinglePlayer() 
+{
+    // Free textures
+    SDL_DestroyTexture(m_backgroundTexture);
+    SDL_DestroyTexture(m_playerHeadTexture);
+    SDL_DestroyTexture(m_playerHandTexture);
+}
+
 SceneId SinglePlayer::run()
 {
     if (initialise() != EXIT_SUCCESS)
@@ -46,14 +54,6 @@ SceneId SinglePlayer::run()
     }
 
     return m_nextScene;
-}
-
-SinglePlayer::~SinglePlayer() 
-{
-    // Free textures
-    SDL_DestroyTexture(m_backgroundTexture);
-    SDL_DestroyTexture(m_playerHeadTexture);
-    SDL_DestroyTexture(m_playerHandTexture);
 }
 
 int SinglePlayer::initialise()

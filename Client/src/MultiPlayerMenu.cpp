@@ -5,6 +5,7 @@
 
 #include "Settings.hpp"
 #include "Toolbox.hpp"
+#include "Client_Streeeat_Fighter.hpp"
 
 MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer) 
     : m_ipPortBox(),
@@ -26,6 +27,7 @@ MultiPlayerMenu::MultiPlayerMenu(SDL_Renderer* renderer)
 
 MultiPlayerMenu::~MultiPlayerMenu()
 {
+    SDL_DestroyTexture(m_buttonTexture);
     TTF_CloseFont(m_textFont);
     SDL_StopTextInput();
 }
@@ -42,8 +44,6 @@ SceneId MultiPlayerMenu::run()
         render();
     }
 
-    TTF_CloseFont(m_textFont);
-    SDL_StopTextInput();
     return m_nextScene;
 }
 
@@ -164,9 +164,13 @@ void MultiPlayerMenu::render()
 void MultiPlayerMenu::connect()
 {
     const std::string& ip = m_ipPortBox.getIp();
-    int port = m_ipPortBox.getPort();
+    unsigned short port = m_ipPortBox.getPort();
 
-    std::cout << ip << port;
+    if (initClientSocket(ip, port) == EXIT_SUCCESS)
+    {
+        m_isRunning = false;
+        m_nextScene = SceneId::MultiPlayer;
+    }
 }
 
 void MultiPlayerMenu::cancel()
