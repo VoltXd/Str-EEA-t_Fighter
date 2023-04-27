@@ -110,6 +110,14 @@ void SinglePlayer::input()
                 {
                     m_webcamManager.startCalibration();
                 }
+                else if (event.key.keysym.sym == SDLK_q)
+                {
+                    isPlayerStartingPunchingLeft = true;
+                }
+                else if (event.key.keysym.sym == SDLK_d)
+                {
+                    isPlayerStartingPunchingRight = true;
+                }
                 break;
 			
 			default:
